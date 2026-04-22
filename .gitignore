@@ -1,0 +1,28 @@
+# Large data files
+data/raw/
+data/*.tar.gz
+data/*.gz
+data/*.bam
+data/*.fastq
+data/*.fq
+data/SRR*/
+
+# Model weights
+model/best_model.pt
+
+# Processed arrays
+data/processed/
+**/*.npy
+
+# Python cache
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Keep these
+!results/.gitkeep
+!report/figures/

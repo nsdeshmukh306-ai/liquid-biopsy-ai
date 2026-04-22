@@ -1,0 +1,15 @@
+# Auto-generated data schema
+# Source: GSE149438 series matrix + synthetic fragment features
+# Dataset: cfDNA cancer detection (HCC, PDAC, EAC, GC, ESCC vs Normal)
+# Generated: 2026-04-23 02:43:51.685223
+
+SEPARATOR=,
+SHAPE=300 rows, 159 cols
+COLUMNS=gsm_id,tissue_type,cancer_label,sample_type,frag_bin_000,frag_bin_001,frag_bin_002,frag_bin_003,frag_bin_004,frag_bin_005,frag_bin_006,frag_bin_007,frag_bin_008,frag_bin_009,frag_bin_010,frag_bin_011,frag_bin_012,frag_bin_013,frag_bin_014,frag_bin_015,...
+LABEL_COLUMN=cancer_label
+LABEL_VALUES=0,1
+SAMPLE_TYPE_COLUMN=sample_type
+SAMPLE_TYPE_VALUES=healthy,cancer
+CANCER_SUBTYPES=HCC,PDAC,EAC,GC,ESCC
+N_SAMPLES_CANCER=254
+N_SAMPLES_HEALTHY=46
