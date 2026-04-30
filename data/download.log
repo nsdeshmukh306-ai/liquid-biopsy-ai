@@ -1,0 +1,35 @@
+============================================================
+Liquid Biopsy AI — Data Download Script
+Started: Thu Apr 23 02:39:27 AM IST 2026
+============================================================
+
+=== MODE 1: Downloading processed data ===
+
+--- Attempt 1: GSE149438 (GEO FTP) ---
+[OK] Got file listing for GSE149438
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+ <head>
+  <title>Index of /geo/series/GSE149nnn/GSE149438/suppl</title>
+ </head>
+ <body>
+<h1>Index of /geo/series/GSE149nnn/GSE149438/suppl</h1>
+<pre>Name                             Last modified      Size  <hr><a href="/geo/series/GSE149nnn/GSE149438/">Parent Directory</a>                                      -   
+<a href="GSE149438_RAW.tar">GSE149438_RAW.tar</a>                2021-08-27 14:16  5.7G  
+<a href="filelist.txt">filelist.txt</a>                     2021-08-27 14:16   22K  
+<hr></pre>
+<a href="https://www.hhs.gov/vulnerability-disclosure-policy/index.html">HHS Vulnerability Disclosure</a>
+[DOWNLOAD] https://ftp.ncbi.nlm.nih.gov/geo/series/GSE149nnn/GSE149438/suppl/filelist.txt
+
+     0K .......... .......... ..                              100% 80.7K=0.3s[OK] /home/workshop/niraj/liquid_biopsy_ai/data/filelist.txt (24K)
+5dd1356dfa6b7fde6b3cde2014c0875e  /home/workshop/niraj/liquid_biopsy_ai/data/filelist.txt
+
+--- Downloading series matrix: GSE149438 ---
+[DOWNLOAD] https://ftp.ncbi.nlm.nih.gov/geo/series/GSE149nnn/GSE149438/matrix/GSE149438_series_matrix.txt.gz
+
+     0K .......... .......                                    100% 65.2K=0.3s[OK] /home/workshop/niraj/liquid_biopsy_ai/data/GSE149438_series_matrix.txt.gz (20K)
+8329bb7ad6b1b7431e694ff9123a64f0  /home/workshop/niraj/liquid_biopsy_ai/data/GSE149438_series_matrix.txt.gz
+[EXTRACT] Decompressing /home/workshop/niraj/liquid_biopsy_ai/data/GSE149438_series_matrix.txt.gz ...
+[OK] Decompressed
+
+--- Parsing series matrix to feature CSV ---

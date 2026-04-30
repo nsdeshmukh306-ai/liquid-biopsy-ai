@@ -1,0 +1,38 @@
+# Liquid Biopsy AI — Data Accessions
+# Date accessed: 2026-04-23
+# Project: Cancer detection from cfDNA sequencing data
+
+## Primary Dataset
+GEO Accession : GSE149438
+Title         : Cell-free DNA methylation sequencing in cancer patients
+Platform      : GPL21290 (Illumina HiSeq)
+Primary URL   : https://ftp.ncbi.nlm.nih.gov/geo/series/GSE149nnn/GSE149438/suppl/
+Alt URL       : https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE149438&format=file
+Expected size : ~150 MB (processed files)
+
+## Fallback Dataset
+GEO Accession : GSE71378
+Title         : Plasma cell-free DNA methylation profiling for cancer detection
+Platform      : GPL18809
+Fallback URL  : https://ftp.ncbi.nlm.nih.gov/geo/series/GSE71nnn/GSE71378/suppl/
+
+## Raw FASTQ Accessions (MODE 2 — requires 300GB+)
+# SRR11537951  cfDNA cancer sample 1
+# SRR11537952  cfDNA cancer sample 2
+# SRR11537953  cfDNA healthy control 1
+# SRR11537954  cfDNA healthy control 2
+# SRR11537955  cfDNA cancer sample 3
+
+## SRA Download Commands (commented — uncomment if needed)
+# prefetch SRR11537951 SRR11537952 SRR11537953 SRR11537954 SRR11537955
+# fasterq-dump --split-files --threads 8 SRR11537951
+# fasterq-dump --split-files --threads 8 SRR11537952
+# fasterq-dump --split-files --threads 8 SRR11537953
+
+## Reference Genome
+# hg38 human genome
+# https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.fa.gz
+
+## File Sizes (expected)
+# GSE149438_suppl.tar.gz  ~150 MB
+# GSE71378_suppl.tar.gz   ~80 MB
