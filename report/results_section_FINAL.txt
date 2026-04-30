@@ -1,0 +1,157 @@
+CORRECTED RESULTS SECTION — Liquid Biopsy AI
+Generated: 2026-04-24
+
+All results use GEO GSE149438 (n=300, externally pre-processed).
+No results from the BAM pipeline (n=8) or synthetic data (n=200) are
+conflated with these figures.
+
+---
+
+§ 7.0 CLASS IMBALANCE — READ BEFORE INTERPRETING METRICS
+
+The GEO dataset contains 254 cancer samples and 46 healthy samples
+(cancer prevalence = 84.7%). A trivial classifier that predicts "cancer"
+for every sample achieves 84.7% accuracy without learning anything.
+
+  Dummy classifier (majority-class) accuracy: 84.7%
+  CNN+LSTM test accuracy: 88.6%
+  Margin above dummy: 3.9 percentage points
+
+CONSEQUENCE: Accuracy is a misleading metric for this dataset.
+The primary metrics throughout this section are AUC-ROC, AUPRC, and
+balanced accuracy. These are robust to class imbalance.
+
+---
+
+§ 7.1 MODEL COMPARISON — ALL BASELINES TRAINED (3-fold StratifiedKFold CV)
+
+The following table presents results from actual training runs.
+All sklearn models used class_weight='balanced'. All models share the
+same 3-fold StratifiedKFold split (random_state=42). Scalers were fitted
+inside each fold on the training partition only (no leakage).
+
+  Model               CV AUC-ROC      CV BalAcc      Notes
+  ───────────────────────────────────────────────────────────────────
+  Dummy (majority)    0.500 ± 0.000   0.500 ± 0.000  Always predicts cancer
+  CNN Only            0.844 ± 0.037   0.753 ± 0.023  First actual training
+  CNN + LSTM (Ours)   0.895 ± 0.032   0.821 ± 0.067  Hybrid architecture
+  LSTM Only           0.946 ± 0.014   0.865 ± 0.020  First actual training
+  Logistic Regression 0.969 ± 0.015   0.846 ± 0.045  Linear baseline
+  Random Forest       0.988 ± 0.006   0.846 ± 0.063  Tree ensemble baseline
+  ───────────────────────────────────────────────────────────────────
+
+HONEST INTERPRETATION:
+- Random Forest achieves the highest AUC (0.988 ± 0.006), outperforming
+  all deep learning models. This is expected: fragment length histogram
+  features are tabular and concentrate their discriminative signal in a
+  small number of bins — a setting where tree ensembles excel.
+- LSTM-only (0.946) outperforms CNN+LSTM (0.895), suggesting the LSTM's
+  sequential modelling of the histogram is more effective than the CNN
+  branch on this feature representation.
+- CNN-only (0.844) is the weakest deep learning model, indicating that
+  local convolutional patterns alone are insufficient.
+- Logistic Regression (0.969) is competitive with the neural approaches,
+  consistent with the known linear separability of cfDNA fragment length
+  distributions in well-curated GEO datasets.
+
+---
+
+§ 7.2 CNN+LSTM TEST SET METRICS (hold-out n=45)
+
+The final CNN+LSTM model (trained on train+val, n=255) was evaluated
+on the held-out test set (n=45: 38 cancer, 7 healthy).
+
+  Metric                      Value
+  ─────────────────────────────────
+  AUC-ROC                     0.921
+  AUPRC                       0.984
+  AUPRC random baseline       0.844  (= cancer prevalence)
+  Balanced accuracy           0.876
+  Sensitivity (cancer recall) 0.895  (34/38 cancer detected)
+  Specificity (healthy recall)0.857  (6/7 healthy detected)
+  PPV (cancer precision)      0.971  (34/35 cancer calls correct)
+  NPV (healthy precision)     0.600  (6/10 healthy calls correct)
+  F1 macro                    0.819
+  F1 weighted                 0.896
+  Confusion matrix:           TP=34  FP=1
+                              FN=4   TN=6
+  ─────────────────────────────────
+
+CLINICAL CONTEXT:
+- Sensitivity of 0.895 means 89.5% of cancer patients are correctly
+  identified. The 4 false negatives (FN) would be missed diagnoses.
+- Specificity of 0.857 means 1 healthy patient is incorrectly
+  flagged as cancer (FP). With so few healthy samples (n=7), this
+  estimate is imprecise.
+- NPV of 0.600 (6/10) indicates unreliable "negative" predictions
+  on this imbalanced test set. A balanced evaluation dataset is
+  needed for clinically meaningful NPV estimation.
+- The test set is small (n=45); all metrics carry substantial
+  sampling uncertainty. 95% CI estimates would require bootstrapping.
+
+---
+
+§ 7.3 LOGISTIC REGRESSION TEST AUC = 1.0 — EXPLANATION
+
+metrics_corrected.json reports LR test AUC = 1.0, test accuracy = 1.0.
+This is an artifact of the small test set (45 samples) combined with
+strong linear separability of the GEO fragment features:
+
+1. The test set contains only 7 healthy samples.
+2. The GEO feature matrix was preprocessed by the original paper's
+   authors specifically to be discriminative — the fragment bins
+   cleanly separate cancer from healthy.
+3. With 45 samples and clean features, LR can memorize the test
+   partition's decision boundary by chance.
+
+The 3-fold CV AUC (0.969 ± 0.015) is the honest performance estimate.
+LR test AUC = 1.0 should not be cited as a generalisation result.
+
+---
+
+§ 7.4 PRECISION-RECALL CURVE
+
+See: report/figures/precision_recall_curve.png
+
+The Precision-Recall curve is required for imbalanced classification
+problems where the positive class (cancer) is the clinically important
+class. AUPRC = 0.984 vs random baseline = 0.844. The area between
+the curve and the random baseline represents the model's improvement
+over chance, which is substantial.
+
+---
+
+§ 7.5 FRAGMENT LENGTH ANALYSIS (BAM Pipeline)
+
+Real fragment lengths were extracted from 3 human-mapping BAM files
+(SRR11537952, SRR11537953, SRR11537954; 97% mapping to hg38; 150,000
+fragments total). The distribution shows a dominant peak at ~168 bp,
+consistent with the expected mono-nucleosomal cfDNA fragment length
+in healthy plasma. No cancer-enriched short-fragment peak at ~132 bp
+was detected, consistent with these samples being from healthy donors.
+
+See: real_fragment_distribution.png
+
+Note: The 5 remaining samples (SRR11537955–59) showed <6% mapping to
+hg38 and are considered non-human reads. Their features in
+data/real_feature_matrix.csv contain fallback placeholder values and
+are excluded from biological interpretation.
+
+---
+
+§ 7.6 PRIOR CLAIMS NOW CORRECTED
+
+  Previous claim                        Corrected
+  ──────────────────────────────────────────────────────────────
+  "CNN+LSTM outperforms all baselines"  RF (0.988) and LSTM-only
+                                        (0.946) outperform CNN+LSTM
+  "Deep learning outperforms ML"        LR (0.969) competitive;
+                                        RF (0.988) is best overall
+  "CNN-only, LSTM-only AUC ~0.856+"    CNN-only=0.844, LSTM-only=0.946
+  (those were estimated offsets)        (now from actual training runs)
+  "AUC > 0.95 on held-out test set"    CNN+LSTM CV AUC = 0.895;
+                                        test AUC = 0.921 (small n=45)
+  "5-fold CV"                           3-fold CV (confirmed by
+                                        training_summary.json)
+  "186,050 parameters" vs "~50K"       186,050 (README corrected)
+  ──────────────────────────────────────────────────────────────

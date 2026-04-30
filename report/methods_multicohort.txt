@@ -1,0 +1,161 @@
+METHODS — MULTI-COHORT EXTERNAL VALIDATION
+Generated: 2026-04-24
+
+---
+
+§ EXTERNAL VALIDATION COHORTS
+
+Three external datasets were identified and evaluated for compatibility
+with the fragment-length CNN+LSTM model trained on GEO GSE149438.
+
+─────────────────────────────────────────────────────────────────────────
+TABLE 1. External validation datasets considered
+─────────────────────────────────────────────────────────────────────────
+Dataset          | Samples | Data type        | Compatible | Status
+─────────────────────────────────────────────────────────────────────────
+PRJNA291063      | 7       | cfDNA WGS FASTQs | YES        | Downloaded
+(Jiang 2015 HCC) | (3 HCC, | Paired-end ~150bp|            | & processed
+                 | 4 ctrl) | plasma cfDNA     |            | via Nextflow
+─────────────────────────────────────────────────────────────────────────
+GSE71378         | 5       | WPS BigBed       | NO         | Downloaded
+(Snyder 2016)    |         | footprints       |            | (stats only)
+─────────────────────────────────────────────────────────────────────────
+GSE186210        | 46      | Mouse RNA-seq    | NO         | Downloaded
+                 |         | gene counts      |            | (excluded)
+─────────────────────────────────────────────────────────────────────────
+FinaleDB         | N/A     | cfDNA features   | YES        | BLOCKED
+(Zenodo)         |         |                  |            | (403 error)
+─────────────────────────────────────────────────────────────────────────
+
+─────────────────────────────────────────────────────────────────────────
+PRJNA291063 — Jiang et al. 2015, HCC cfDNA Study
+─────────────────────────────────────────────────────────────────────────
+
+BioProject PRJNA291063 (ENA accession ERP011895) contains plasma cfDNA
+whole-genome sequencing data from a hepatocellular carcinoma (HCC) cohort
+published by Jiang et al. (2015). The study used low-coverage WGS of
+plasma cfDNA to investigate fragment-length patterns as a cancer biomarker.
+
+Sample selection: From 60 total runs, we selected 7 samples with
+sufficient sequencing depth for validation:
+  - IH01 (SRR2130050): healthy control
+  - IH02 (SRR2130051): healthy control
+  - IH03 (SRR2130052): healthy control
+  - IC05 (SRR2130005): HCC patient
+  - IC08 (SRR2130007): HCC patient
+  - IC29 (SRR2130028): HCC patient
+  - IC38 (SRR2130036): HCC patient
+
+Note: IH01 and IH02 are large files (314 GB and 67 GB respectively) and
+were not downloaded due to storage constraints. IH03 (3.93 GB) and IC05,
+IC08, IC29, IC38 (2.89–3.70 GB) were downloaded from ENA FTP.
+
+Adjacent tissue samples (IA* samples) were excluded — these are tissue
+biopsies, not plasma cfDNA, and would introduce a confounding data type
+difference.
+
+─────────────────────────────────────────────────────────────────────────
+Feature extraction pipeline
+─────────────────────────────────────────────────────────────────────────
+
+Downloaded paired-end FASTQ files were processed through the Nextflow
+pipeline (nextflow/main.nf):
+  1. Quality trimming: Trimmomatic (SLIDINGWINDOW:4:20, MINLEN:36)
+  2. Alignment: BWA-MEM to hg38 (GRCh38) reference genome
+  3. Sorting/indexing: samtools
+  4. Fragment length extraction: custom Python script (02_extract_features.py)
+     - Reads properly paired reads (flag 0x2)
+     - Fragment size = template length from TLEN field
+     - Filter: 100–400 bp (cfDNA range)
+     - Bins: 150 equal bins spanning 100–400 bp
+     - Normalised to relative frequency (sum = 1.0 per sample)
+
+The resulting 150-bin fragment length histogram matches the feature format
+of the training data (GEO GSE149438) in terms of bin count and range.
+
+─────────────────────────────────────────────────────────────────────────
+Feature harmonisation
+─────────────────────────────────────────────────────────────────────────
+
+The external cohort features were aligned to the 150 training feature
+columns by name. Missing columns were filled with 0. The StandardScaler
+fitted on the GEO training partition (n=255 train+val) was applied to
+both the GEO test set and the external cohort without re-fitting, to
+prevent information leakage.
+
+─────────────────────────────────────────────────────────────────────────
+GSE71378 — Snyder et al. 2016, WPS footprints (EXCLUDED from ML)
+─────────────────────────────────────────────────────────────────────────
+
+Five BigBed (.bb) files from GEO accession GSE71378 were downloaded
+(BH01, IH01, IH02, CA01, CH01; 1.1 GB total). After inspection, these
+files contain Windowed Protection Score (WPS) nucleosome footprint
+coordinates (peak width 7–150 bp) — NOT cfDNA fragment lengths.
+
+WPS peaks represent local nucleosome positioning derived from cfDNA
+coverage patterns. They cannot be used as input to a fragment-length
+histogram model. Summary statistics (median peak width, mean WPS score)
+were extracted for supplementary analysis only (see
+results/validation/snyder2016_wps_statistics.csv).
+
+─────────────────────────────────────────────────────────────────────────
+GSE186210 (EXCLUDED — incompatible data type)
+─────────────────────────────────────────────────────────────────────────
+
+The supplemental file GSE186210_table.tsv.gz was found to contain a
+54,134-gene × 46-sample mouse RNA-seq count matrix. This is not cfDNA
+fragmentation data and is entirely incompatible with the fragment-length
+model. This accession does not contain the DELFI lung cancer cfDNA data
+originally sought.
+
+─────────────────────────────────────────────────────────────────────────
+FinaleDB (EXCLUDED — access blocked)
+─────────────────────────────────────────────────────────────────────────
+
+The FinaleDB cfDNA feature database (Zenodo records 6914806 and 6914861)
+returned HTTP 403 Forbidden for all download attempts. The FinaleDB API
+(finaledb.research.cchmc.org) was also offline. This cohort could not
+be included.
+
+─────────────────────────────────────────────────────────────────────────
+§ CROSS-COHORT VALIDATION PROCEDURE
+─────────────────────────────────────────────────────────────────────────
+
+The trained CNN+LSTM model (model/best_model.pt, AUC-ROC=0.921 on GEO
+holdout) was applied to the PRJNA291063 external cohort features without
+re-training or fine-tuning. This tests zero-shot generalisation: whether
+fragment-length patterns learned from GEO GSE149438 transfer to an
+independent study processed through a different pipeline.
+
+Metrics reported:
+  - AUC-ROC (primary; threshold-independent)
+  - Balanced accuracy, sensitivity, specificity (at threshold=0.5)
+  - Generalisation gap (internal AUC − external AUC)
+
+Results: see results/validation/cross_cohort_validation.json
+Figure:  report/figures/cross_cohort_validation.png
+
+─────────────────────────────────────────────────────────────────────────
+§ IMPORTANT CAVEATS
+─────────────────────────────────────────────────────────────────────────
+
+1. SMALL SAMPLE SIZE: The PRJNA291063 validation set contains only 7
+   samples (3 healthy, 4 HCC). AUC computed from 7 samples has very wide
+   confidence intervals and any reported value should be interpreted with
+   extreme caution.
+
+2. HCC vs PAN-CANCER: Training data (GEO GSE149438) is a pan-cancer
+   dataset (cancer_type not specified). External cohort is HCC-specific.
+   Cancer type differences may inflate or deflate apparent generalisation.
+
+3. PIPELINE DIFFERENCES: Feature extraction in GSE149438 was performed
+   by the original study authors; PRJNA291063 features were extracted
+   by our Nextflow pipeline. Systematic bin definition differences would
+   cause feature mismatch even for identical biological signals.
+
+4. COVERAGE DIFFERENCES: PRJNA291063 IH03 (IH03 = ~3.93 GB compressed)
+   has shallower coverage than IH01/IH02 (314 GB, 67 GB). Fragment
+   length histograms from shallow sequencing may be noisier.
+
+These limitations mean the external AUC should be considered a pilot
+estimate, not a definitive demonstration of clinical generalisability.

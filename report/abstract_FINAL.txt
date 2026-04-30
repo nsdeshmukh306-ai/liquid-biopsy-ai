@@ -1,0 +1,56 @@
+CORRECTED ABSTRACT — Liquid Biopsy AI
+(Replace the existing abstract in the notebook/report with this text)
+Generated: 2026-04-24
+
+---
+
+This project presents an end-to-end computational pipeline for non-invasive
+cancer detection from cell-free DNA (cfDNA) using a hybrid CNN+LSTM deep
+learning model. Two parallel components were developed and clearly distinguished:
+
+BIOINFORMATICS PIPELINE (executed on server):
+We built a complete Nextflow DSL2 pipeline — FastQC → Trimmomatic → BWA-MEM →
+samtools fixmate/sort/markdup → cfDNA feature extraction — and applied it to
+8 real cfDNA samples from NCBI SRA (SRR11537952–SRR11537959, BioProject
+PRJNA624356). Three of eight samples (SRR11537952–54) showed 97% mapping to
+the hg38 reference genome and were confirmed as human cfDNA; the remaining
+five samples showed <6% mapping (non-human reads, likely cross-species
+BioProject contamination). Real fragment length extraction from the 3
+human-mapping BAM files (150,000 fragments) confirmed the biologically
+expected nucleosomal peak at ~168 bp.
+
+MACHINE LEARNING PIPELINE (trained on GEO-preprocessed features):
+Due to the absence of ground-truth cancer/healthy labels for our 8 SRA samples,
+model training was performed on the externally pre-processed feature matrix
+from GEO accession GSE149438 (n=300: 254 cancer / 46 healthy; cancer subtypes:
+PDAC, ESCC, HCC, CRC, GC, EAC; preprocessed by the original study authors).
+
+The dataset is heavily imbalanced (84.7% cancer); accuracy alone is therefore
+uninformative. AUC-ROC and AUPRC are the primary metrics.
+
+MODEL PERFORMANCE (3-fold StratifiedKFold CV, n=255 train+val, GEO GSE149438):
+  Model                 CV AUC-ROC         Balanced Accuracy
+  ─────────────────────────────────────────────────────────
+  Dummy (majority)      0.500 ± 0.000      0.500 ± 0.000
+  CNN Only              0.844 ± 0.037      0.753 ± 0.023
+  CNN + LSTM (Ours)     0.895 ± 0.032      0.821 ± 0.067
+  LSTM Only             0.946 ± 0.014      0.865 ± 0.020
+  Logistic Regression   0.969 ± 0.015      0.846 ± 0.045
+  Random Forest         0.988 ± 0.006      0.846 ± 0.063
+
+On the held-out test set (n=45): CNN+LSTM AUC-ROC=0.921, AUPRC=0.984,
+sensitivity=0.895, specificity=0.857, balanced accuracy=0.876.
+
+HONEST ASSESSMENT: Random Forest and LSTM-only outperform the CNN+LSTM hybrid
+on this fragment-length-histogram feature set, where the signal is largely
+concentrated in a small number of bins (a setting that favours tree-based
+and sequential models over joint CNN+LSTM fusion). The CNN+LSTM architecture
+would likely offer greater advantages on raw sequence data or multi-modal inputs.
+
+All three data sources (GEO n=300, BAM pipeline n=8, synthetic n=200) are
+clearly labelled throughout. No data sources are conflated. All reported
+results use leakage-free evaluation (scaler fitted inside each CV fold on
+the training partition only).
+
+Code, trained model weights, Nextflow pipeline, and all results are
+available in the accompanying project archive.

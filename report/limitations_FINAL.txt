@@ -1,0 +1,90 @@
+CORRECTED LIMITATIONS SECTION — Liquid Biopsy AI
+Generated: 2026-04-24
+
+---
+
+§ 9. LIMITATIONS AND FUTURE WORK
+
+9.1 DATA SOURCE MISMATCH (Most Important Limitation)
+The core limitation of this project is that the bioinformatics pipeline
+and the machine learning model operate on different datasets:
+
+- Our Nextflow pipeline processed 8 real cfDNA samples (SRR11537952–59)
+  from NCBI SRA. Only 3 are human-mapping; 5 are non-human.
+- The ML model was trained on a pre-processed feature matrix from GEO
+  (GSE149438, n=300) computed by the original study's authors.
+- These two datasets were NEVER joined. The 8-sample BAM output has no
+  ground-truth cancer/healthy labels and was not used for training.
+- Therefore, the model's clinical performance claims apply only to data
+  distributed similarly to GSE149438, not to arbitrary cfDNA FASTQs
+  processed through our pipeline.
+
+This is disclosed in DATA_PROVENANCE.md and CLAUDE_PROJECT_BRIEFING.md.
+
+9.2 CLASS IMBALANCE
+The GEO dataset has 254/300 cancer (84.7%). This is not representative
+of general population cancer prevalence (~0.5–2% for most cancers). A
+model trained on 84.7% cancer data will have a decision threshold that
+is not appropriate for screening applications. Future work should either:
+  a) Downsample cancer to match realistic prevalence, or
+  b) Use cost-sensitive learning and calibrate decision thresholds, or
+  c) Report calibrated probabilities rather than binary predictions.
+
+9.3 TRAINING DATA FROM EXTERNAL PREPROCESSING
+Features in data/feature_matrix.csv were computed by the original
+paper's authors (GSE149438). We did not control how fragment bins were
+defined, how GC correction was applied, or how samples were selected.
+Any biases in the original preprocessing are inherited by our model.
+
+9.4 MODEL ARCHITECTURE NOT OPTIMAL FOR THIS FEATURE SET
+Random Forest (AUC=0.988) and LSTM-only (AUC=0.946) outperform the
+CNN+LSTM hybrid (AUC=0.895). Fragment length histogram features are
+tabular, with discriminative signal concentrated in a few bins — a
+setting where tree ensembles and sequential models naturally excel.
+The CNN+LSTM hybrid would likely outperform simpler baselines on:
+  - Raw DNA sequence data (nucleotide-level features)
+  - Multi-channel inputs (fragment length + methylation + coverage)
+  - End-to-end learning from BAM reads without manual feature engineering
+
+9.5 NON-HUMAN BAM SAMPLES
+5 of 8 SRA samples (SRR11537955–59) showed <6% mapping to hg38.
+These are likely non-human samples included in the same BioProject.
+No BLAST investigation was performed to confirm their species identity.
+Their features in real_feature_matrix.csv are fallback placeholder values
+and must not be used for biological analysis.
+
+9.6 METHYLATION DATA IS SIMULATED
+The methylation heatmap (report/figures/methylation_heatmap.png) uses
+Beta-distribution random values, not real CpG methylation measurements.
+Real methylation requires bisulfite sequencing (WGBS), which is a
+different assay from standard WGS/cfDNA panel sequencing. The figure is
+watermarked as "⚠ SIMULATED DATA" and is for illustrative purposes only.
+
+9.7 NO INDEPENDENT VALIDATION COHORT
+All reported metrics are from cross-validation within the GEO dataset.
+No external independent cohort was used for validation. Performance on
+an independent cohort from a different institution and sequencing platform
+would be expected to be lower due to batch effects and protocol variation.
+
+9.8 SMALL EFFECTIVE TEST COHORT
+The held-out test set contains only 7 healthy samples. Specificity
+(0.857) and NPV (0.600) estimates carry substantial uncertainty due to
+this small denominatar. A bootstrapped 95% CI would be needed for any
+clinical interpretation of these metrics.
+
+9.9 COMPUTATIONAL TRAINING
+The CNN+LSTM model was trained on CPU. GPU training (recommended in
+scripts/03_train_model.py) was not available. Training ran for fewer
+effective epochs due to early stopping, which may have prevented full
+convergence of the larger model branches.
+
+9.10 FUTURE WORK
+  a) Train on BAM-derived features with ground-truth labels (requires
+     obtaining labelled WGS cfDNA samples with cancer confirmation)
+  b) Validate on an independent cohort (different GEO accession)
+  c) Implement cancer subtype classification (HCC vs PDAC vs ESCC etc.)
+  d) Add MultiQC to Nextflow pipeline for aggregate QC reporting
+  e) Apply BLAST to identify non-human SRA reads (SRR11537955–59)
+  f) Use real bisulfite sequencing data for methylation features
+  g) Calibrate model probabilities (Platt scaling or isotonic regression)
+     to support clinically interpretable risk scores

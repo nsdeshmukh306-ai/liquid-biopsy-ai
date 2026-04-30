@@ -1,0 +1,78 @@
+DATA AVAILABILITY STATEMENT
+Generated: 2026-04-24
+
+---
+
+All data used in this study are publicly available.
+
+TRAINING DATA
+  Repository: NCBI Gene Expression Omnibus (GEO)
+  Accession:  GSE149438
+  URL:        https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE149438
+  Content:    Pre-processed cfDNA fragment length feature matrix (n=300 samples)
+              Provided by the original study authors; not raw FASTQs.
+
+NEXTFLOW PIPELINE VALIDATION DATA (raw FASTQs)
+  Repository: NCBI Sequence Read Archive (SRA)
+  BioProject: PRJNA624356
+  Accessions: SRR11537952, SRR11537953, SRR11537954 (human-mapping, >90%)
+              SRR11537955–SRR11537959 (non-human, <6% mapping to hg38)
+  URL:        https://www.ncbi.nlm.nih.gov/bioproject/PRJNA624356
+  Note:       These samples have no ground-truth cancer/healthy labels
+              and were not used for ML model training or evaluation.
+
+EXTERNAL VALIDATION COHORT (PRJNA291063)
+  Repository: European Nucleotide Archive (ENA) / NCBI SRA
+  BioProject: PRJNA291063
+  ENA Study:  ERP011895
+  Accessions: SRR2130050 (IH01), SRR2130051 (IH02), SRR2130052 (IH03)
+              SRR2130005 (IC05), SRR2130007 (IC08), SRR2130028 (IC29),
+              SRR2130036 (IC38)
+  URL:        https://www.ebi.ac.uk/ena/browser/view/PRJNA291063
+  Reference:  Jiang et al. (2015). Tumour- and origin-specific cfDNA
+              analysis. Nature Materials.
+
+GSE71378 WPS FOOTPRINTS (SUPPLEMENTARY ANALYSIS ONLY)
+  Repository: NCBI Gene Expression Omnibus (GEO)
+  Accession:  GSE71378
+  URL:        https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE71378
+  Content:    Windowed Protection Score (WPS) BigBed files from 5 samples.
+              NOTE: Contains nucleosome footprint coordinates (7–150 bp peaks),
+              NOT cfDNA fragment lengths. Not compatible with fragment-length
+              model. Used for supplementary WPS statistics only.
+  Reference:  Snyder et al. (2016). Cell-free DNA comprises an in vivo
+              nucleosome footprint that informs its tissues-of-origin.
+              Cell, 164(1-2), 57-68.
+
+REFERENCE GENOME
+  Assembly:   hg38 (GRCh38)
+  Source:     UCSC Genome Browser
+  URL:        https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/
+  Files:      hg38.fa (FASTA), BWA index (pre-built)
+
+CODE
+  Language:   Python 3.13, PyTorch 2.11.0, scikit-learn 1.8.0
+  Pipeline:   Nextflow 25.10.4
+  Repository: Provided as supplementary archive
+              liquid_biopsy_ai_niraj_publication.tar.gz
+  Key scripts:
+    scripts/01_preprocess.py        — feature matrix preprocessing
+    scripts/03_train_model.py       — CNN+LSTM training
+    scripts/train_baselines.py      — all baseline model training
+    scripts/compute_full_metrics.py — publication metrics computation
+    nextflow/main.nf                — FASTQ→BAM→features pipeline
+
+TRAINED MODEL WEIGHTS
+  File:       model/best_model.pt (744 KB)
+  Included in supplementary archive.
+
+PROCESSED DATA FILES (included in archive)
+  data/feature_matrix.csv                     — GEO training features (n=300)
+  results/model_comparison_REAL.json           — all model AUC values
+  results/full_metrics_publication.json        — complete test-set metrics
+  results/validation/jiang_hcc_features.csv   — external cohort features
+  results/validation/cross_cohort_validation.json — generalisation results
+
+EXCLUDED DATASETS (access issues)
+  FinaleDB (Zenodo records 6914806/6914861): Access blocked (HTTP 403).
+  GSE186210: Contains mouse RNA-seq data, not cfDNA features.

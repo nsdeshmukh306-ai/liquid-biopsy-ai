@@ -1,0 +1,138 @@
+RESULTS — MULTI-COHORT EXTERNAL VALIDATION
+Generated: 2026-04-25
+
+---
+
+§ 8. EXTERNAL VALIDATION RESULTS
+
+8.0 COHORT ACQUISITION SUMMARY
+
+Four external datasets were sought for independent validation. Table 1
+summarises acquisition outcome and compatibility.
+
+TABLE 1. External validation datasets — acquisition outcome
+────────────────────────────────────────────────────────────────────────────
+Dataset         | Type          | Samples | Obtained | Usable for model
+────────────────────────────────────────────────────────────────────────────
+PRJNA291063     | cfDNA WGS     | 3+4     | YES      | YES (primary)
+(Jiang 2015 HCC)| paired FASTQs | (ctrl+  |          | After BWA→fragment
+                |               | HCC)    |          | length extraction
+────────────────────────────────────────────────────────────────────────────
+GSE71378        | WPS BigBed    | 5       | YES      | NO (supplementary)
+(Snyder 2016)   | footprints    |         |          | WPS peaks ≠ frag len
+────────────────────────────────────────────────────────────────────────────
+GSE186210       | Mouse RNA-seq | 46      | YES      | NO (incompatible)
+                | gene counts   |         |          | Wrong assay + species
+────────────────────────────────────────────────────────────────────────────
+FinaleDB        | cfDNA features| N/A     | BLOCKED  | N/A (403 error)
+(Zenodo)        |               |         |          |
+────────────────────────────────────────────────────────────────────────────
+
+8.1 PRJNA291063 — JIANG 2015 HCC COHORT
+
+Samples downloaded and processed:
+  IH03 (SRR2130052): healthy control, plasma cfDNA
+  IC05 (SRR2130005): HCC patient, plasma cfDNA
+  IC08 (SRR2130007): HCC patient, plasma cfDNA
+
+Note on data acquisition: ENA provides both full paired-end FASTQs
+(_1.fastq.gz, _2.fastq.gz) and an interleaved "merged" file (.fastq.gz).
+The interleaved files were discovered post-download to contain only R1
+reads with lengths of 8–38 bp (quality-trimmed remnants), not usable for
+fragment length analysis. Full paired-end FASTQs were then downloaded.
+
+Partial FASTQ download strategy: BGZF-format FASTQs are made of
+independently decompressible 64-KB blocks. The partial downloads (198–
+224 MB per read file) provide ~7–10 million usable read pairs, which is
+sufficient for a stable 150-bin fragment length histogram. Full files
+are 900–1,278 MB; analysis is therefore based on ≈15–25% of total depth.
+
+BWA-MEM alignment pipeline:
+  - Reference: hg38 (GRCh38), BWA index at /home/workshop/niraj/reference/hg38
+  - Flags: -f 2 (properly paired), -F 2048 (no supplementary)
+  - Fragment length: TLEN field of read 1 alignments (flag 67)
+  - Range filter: 100–400 bp
+  - Bin count: 150 equal bins (same as training data)
+
+8.2 INTERNAL TEST-SET PERFORMANCE (GEO GSE149438)
+    [Repeated here for direct comparison]
+
+  n (test) = 45 samples (38 cancer, 7 healthy)
+  AUC-ROC          = 0.921
+  AUPRC            = 0.984
+  Balanced accuracy= 0.876
+  Sensitivity      = 0.895  (cancer recall)
+  Specificity      = 0.857  (healthy recall)
+
+8.3 EXTERNAL VALIDATION (PRJNA291063)
+
+  [See results/validation/cross_cohort_validation.json for exact values]
+
+  n = 3 samples (1 healthy IH03, 2 HCC IC05 + IC08)
+  AUC-ROC: computed from probability scores vs binary labels
+  NOTE: AUC from n=3 is statistically uninformative.
+        Any value from 0.0 to 1.0 is compatible with true AUC anywhere
+        in that range, given n=3. This must be stated clearly.
+
+8.4 GSE71378 WPS FOOTPRINT STATISTICS (SUPPLEMENTARY)
+
+  Windowed Protection Score (WPS) nucleosome footprints were extracted
+  from 5 BigBed files (BH01, IH01, IH02 = healthy; CA01, CH01 = cancer).
+
+  Key statistics (from the first 5 chromosomes, up to 200,000 footprints
+  per chromosome per sample):
+
+  - WPS footprint lengths: 7–150 bp (short nucleosome protection zones)
+  - Median footprint length: ~22 bp across samples
+  - These are NOT cfDNA fragment lengths (100–400 bp)
+  - No model performance metric computed — data type mismatch
+
+  Interpretation: GSE71378 WPS footprints represent the nucleosome-
+  depleted linker regions between nucleosomes, not the full cfDNA
+  fragment. They encode a different biological signal (nucleosome
+  positioning) and cannot be directly compared to fragment length
+  histograms. A WPS-based analysis would require a different model
+  architecture trained on WPS profiles.
+
+8.5 GENERALISATION ASSESSMENT
+
+HONEST ASSESSMENT:
+
+  Primary question: Does the CNN+LSTM model generalise to independent
+  cohorts processed by a different pipeline?
+
+  What we know from internal evaluation:
+  - GEO test AUC = 0.921 on 45 samples (38 cancer, 7 healthy)
+  - 84.7% cancer prevalence in training set vs ~50% in PRJNA291063
+  - Model was trained on externally pre-processed features; PRJNA291063
+    features were extracted by our Nextflow pipeline
+
+  What limits our conclusion:
+  1. n=3 external samples — cannot compute meaningful AUC
+  2. Feature pipeline mismatch — GEO features computed by original
+     authors with unknown preprocessing; PRJNA291063 by our pipeline
+  3. Cancer prevalence mismatch — model trained on 84.7% cancer data
+     may have a biased decision threshold for balanced cohorts
+  4. Cancer type match — PRJNA291063 is HCC only; training data is
+     pan-cancer (cancer type unspecified)
+
+  What can legitimately be claimed:
+  - The model was trained, tested, and cross-validated rigorously within
+    the GEO dataset (AUC=0.921, AUPRC=0.984)
+  - External validation was attempted on the only publicly accessible,
+    paired-end cfDNA WGS dataset found with labelled cancer/healthy samples
+  - The sample count (n=3) is too small for statistically meaningful
+    AUC estimation; bootstrapped 95% CIs would be required
+  - Larger independent validation is listed as Future Work §9.10a
+
+  Recommended phrasing for paper:
+    "External validation was performed on 3 samples (1 healthy, 2 HCC)
+    from PRJNA291063 (Jiang et al. 2015). Due to the very small sample
+    size (n=3), the external AUC cannot be interpreted as a robust
+    estimate of generalisation performance. Larger independent validation
+    cohorts are needed to assess true clinical generalisability."
+
+  Bottom line: Based on available evidence, no strong claim of
+  generalisation can be made. The internal cross-validation results
+  (AUC=0.921) are valid within the GEO dataset; external performance
+  is unknown due to data access constraints.

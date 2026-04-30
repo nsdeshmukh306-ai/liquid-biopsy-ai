@@ -1,0 +1,207 @@
+=== BAM QC Summary ===
+Generated: Fri Apr 24 02:05:19 PM IST 2026
+Pipeline: Nextflow (FASTQC → Trimmomatic → BWA-MEM → samtools markdup)
+
+--- SRR11537952 ---
+14851822 + 0 in total (QC-passed reads + QC-failed reads)
+12600218 + 0 primary
+0 + 0 secondary
+2251604 + 0 supplementary
+0 + 0 duplicates
+0 + 0 primary duplicates
+14539374 + 0 mapped (97.90% : N/A)
+12287770 + 0 primary mapped (97.52% : N/A)
+12600218 + 0 paired in sequencing
+6300109 + 0 read1
+6300109 + 0 read2
+10216462 + 0 properly paired (81.08% : N/A)
+12014994 + 0 with itself and mate mapped
+272776 + 0 singletons (2.16% : N/A)
+842036 + 0 with mate mapped to a different chr
+240294 + 0 with mate mapped to a different chr (mapQ>=5)
+
+--- SRR11537953 ---
+22552779 + 0 in total (QC-passed reads + QC-failed reads)
+17508088 + 0 primary
+0 + 0 secondary
+5044691 + 0 supplementary
+0 + 0 duplicates
+0 + 0 primary duplicates
+22037573 + 0 mapped (97.72% : N/A)
+16992882 + 0 primary mapped (97.06% : N/A)
+17508088 + 0 paired in sequencing
+8754044 + 0 read1
+8754044 + 0 read2
+13487674 + 0 properly paired (77.04% : N/A)
+16533920 + 0 with itself and mate mapped
+458962 + 0 singletons (2.62% : N/A)
+1955890 + 0 with mate mapped to a different chr
+494543 + 0 with mate mapped to a different chr (mapQ>=5)
+
+--- SRR11537954 ---
+17193035 + 0 in total (QC-passed reads + QC-failed reads)
+13203708 + 0 primary
+0 + 0 secondary
+3989327 + 0 supplementary
+0 + 0 duplicates
+0 + 0 primary duplicates
+16780226 + 0 mapped (97.60% : N/A)
+12790899 + 0 primary mapped (96.87% : N/A)
+13203708 + 0 paired in sequencing
+6601854 + 0 read1
+6601854 + 0 read2
+9621044 + 0 properly paired (72.87% : N/A)
+12419218 + 0 with itself and mate mapped
+371681 + 0 singletons (2.81% : N/A)
+1682716 + 0 with mate mapped to a different chr
+433859 + 0 with mate mapped to a different chr (mapQ>=5)
+
+--- SRR11537955 ---
+1632894 + 0 in total (QC-passed reads + QC-failed reads)
+1632894 + 0 primary
+0 + 0 secondary
+0 + 0 supplementary
+0 + 0 duplicates
+0 + 0 primary duplicates
+68779 + 0 mapped (4.21% : N/A)
+68779 + 0 primary mapped (4.21% : N/A)
+1632894 + 0 paired in sequencing
+816447 + 0 read1
+816447 + 0 read2
+68702 + 0 properly paired (4.21% : N/A)
+68710 + 0 with itself and mate mapped
+69 + 0 singletons (0.00% : N/A)
+4 + 0 with mate mapped to a different chr
+0 + 0 with mate mapped to a different chr (mapQ>=5)
+
+--- SRR11537956 ---
+1084736 + 0 in total (QC-passed reads + QC-failed reads)
+1084692 + 0 primary
+0 + 0 secondary
+44 + 0 supplementary
+0 + 0 duplicates
+0 + 0 primary duplicates
+31939 + 0 mapped (2.94% : N/A)
+31895 + 0 primary mapped (2.94% : N/A)
+1084692 + 0 paired in sequencing
+542346 + 0 read1
+542346 + 0 read2
+31790 + 0 properly paired (2.93% : N/A)
+31814 + 0 with itself and mate mapped
+81 + 0 singletons (0.01% : N/A)
+10 + 0 with mate mapped to a different chr
+9 + 0 with mate mapped to a different chr (mapQ>=5)
+
+--- SRR11537957 ---
+1910766 + 0 in total (QC-passed reads + QC-failed reads)
+1910766 + 0 primary
+0 + 0 secondary
+0 + 0 supplementary
+0 + 0 duplicates
+0 + 0 primary duplicates
+94816 + 0 mapped (4.96% : N/A)
+94816 + 0 primary mapped (4.96% : N/A)
+1910766 + 0 paired in sequencing
+955383 + 0 read1
+955383 + 0 read2
+94750 + 0 properly paired (4.96% : N/A)
+94764 + 0 with itself and mate mapped
+52 + 0 singletons (0.00% : N/A)
+4 + 0 with mate mapped to a different chr
+0 + 0 with mate mapped to a different chr (mapQ>=5)
+
+--- SRR11537958 ---
+1563310 + 0 in total (QC-passed reads + QC-failed reads)
+1563310 + 0 primary
+0 + 0 secondary
+0 + 0 supplementary
+0 + 0 duplicates
+0 + 0 primary duplicates
+61905 + 0 mapped (3.96% : N/A)
+61905 + 0 primary mapped (3.96% : N/A)
+1563310 + 0 paired in sequencing
+781655 + 0 read1
+781655 + 0 read2
+61806 + 0 properly paired (3.95% : N/A)
+61812 + 0 with itself and mate mapped
+93 + 0 singletons (0.01% : N/A)
+4 + 0 with mate mapped to a different chr
+1 + 0 with mate mapped to a different chr (mapQ>=5)
+
+--- SRR11537959 ---
+1922891 + 0 in total (QC-passed reads + QC-failed reads)
+1922890 + 0 primary
+0 + 0 secondary
+1 + 0 supplementary
+0 + 0 duplicates
+0 + 0 primary duplicates
+105187 + 0 mapped (5.47% : N/A)
+105186 + 0 primary mapped (5.47% : N/A)
+1922890 + 0 paired in sequencing
+961445 + 0 read1
+961445 + 0 read2
+105110 + 0 properly paired (5.47% : N/A)
+105120 + 0 with itself and mate mapped
+66 + 0 singletons (0.00% : N/A)
+4 + 0 with mate mapped to a different chr
+1 + 0 with mate mapped to a different chr (mapQ>=5)
+
+
+=== Adapter Trimming Summary ===
+(From Trimmomatic logs in results/nextflow/trimmed/logs/)
+
+--- SRR11537952 ---
+Input Read Pairs: 10673682 Both Surviving: 6300109 (59.02%) Forward Only Surviving: 1400374 (13.12%) Reverse Only Surviving: 2588049 (24.25%) Dropped: 385150 (3.61%)
+TrimmomaticPE: Completed successfully
+
+--- SRR11537953 ---
+Input Read Pairs: 14899413 Both Surviving: 8754044 (58.75%) Forward Only Surviving: 1704506 (11.44%) Reverse Only Surviving: 3940452 (26.45%) Dropped: 500411 (3.36%)
+TrimmomaticPE: Completed successfully
+
+--- SRR11537954 ---
+Input Read Pairs: 11559168 Both Surviving: 6601854 (57.11%) Forward Only Surviving: 1082104 (9.36%) Reverse Only Surviving: 3481379 (30.12%) Dropped: 393831 (3.41%)
+TrimmomaticPE: Completed successfully
+
+--- SRR11537955 ---
+Input Read Pairs: 867774 Both Surviving: 816447 (94.09%) Forward Only Surviving: 48665 (5.61%) Reverse Only Surviving: 1080 (0.12%) Dropped: 1582 (0.18%)
+TrimmomaticPE: Completed successfully
+
+--- SRR11537956 ---
+Input Read Pairs: 563709 Both Surviving: 542346 (96.21%) Forward Only Surviving: 20060 (3.56%) Reverse Only Surviving: 809 (0.14%) Dropped: 494 (0.09%)
+TrimmomaticPE: Completed successfully
+
+--- SRR11537957 ---
+Input Read Pairs: 978822 Both Surviving: 955383 (97.61%) Forward Only Surviving: 19926 (2.04%) Reverse Only Surviving: 1281 (0.13%) Dropped: 2232 (0.23%)
+TrimmomaticPE: Completed successfully
+
+--- SRR11537958 ---
+Input Read Pairs: 799501 Both Surviving: 781655 (97.77%) Forward Only Surviving: 15919 (1.99%) Reverse Only Surviving: 1203 (0.15%) Dropped: 724 (0.09%)
+TrimmomaticPE: Completed successfully
+
+--- SRR11537959 ---
+Input Read Pairs: 1004461 Both Surviving: 961445 (95.72%) Forward Only Surviving: 41023 (4.08%) Reverse Only Surviving: 954 (0.09%) Dropped: 1039 (0.10%)
+TrimmomaticPE: Completed successfully
+
+=== Known Issues ===
+- SRR11537955-59: Low mapping rates (2-6%) — reads appear to be non-human (bacterial/other organism)
+- SRR11537952-54: High mapping rates (97%) — these are proper human cfDNA samples
+- Duplicate marking: samtools markdup used (requires samtools fixmate -m first — fix applied)
+- MultiQC not run — individual FastQC HTMLs available in results/nextflow/fastqc/
+
+=== FastQC Reports ===
+SRR11537952_1_fastqc.html
+SRR11537952_2_fastqc.html
+SRR11537953_1_fastqc.html
+SRR11537953_2_fastqc.html
+SRR11537954_1_fastqc.html
+SRR11537954_2_fastqc.html
+SRR11537955_1_fastqc.html
+SRR11537955_2_fastqc.html
+SRR11537956_1_fastqc.html
+SRR11537956_2_fastqc.html
+SRR11537957_1_fastqc.html
+SRR11537957_2_fastqc.html
+SRR11537958_1_fastqc.html
+SRR11537958_2_fastqc.html
+SRR11537959_1_fastqc.html
+SRR11537959_2_fastqc.html

@@ -1,0 +1,91 @@
+REPRODUCIBILITY STATEMENT — Liquid Biopsy AI
+Generated: 2026-04-24
+
+---
+
+§ REPRODUCIBILITY AND SOFTWARE ENVIRONMENT
+
+All random seeds are fixed to 42 throughout:
+  Python random : random.seed(42)
+  NumPy         : np.random.seed(42)
+  PyTorch       : torch.manual_seed(42)
+  CUDA          : torch.cuda.manual_seed_all(42)
+  sklearn splits: random_state=42
+  train_test_split: random_state=42
+
+Software environment (conda env: workshop_nf):
+  Python          : 3.13.12
+  PyTorch         : 2.11.0+cpu
+  scikit-learn    : 1.8.0
+  NumPy           : 2.4.3
+  pandas          : 3.0.2
+  scipy           : 1.17.1
+  matplotlib      : 3.10.8
+  pysam           : 0.23.3
+  Nextflow        : 25.10.4
+  FastQC          : 0.12.1
+  Trimmomatic     : 0.39
+  BWA             : 0.7.17-r1188
+  samtools        : 1.23.1
+  Reference genome: hg38 (GRCh38), pre-built BWA index
+
+Full software_versions.txt: results/software_versions.txt
+
+Data sources:
+  Training data:   GEO accession GSE149438 (NCBI GEO)
+                   Feature matrix: data/feature_matrix.csv (n=300)
+                   Preprocessed by original study authors.
+  Raw FASTQs:      NCBI SRA, BioProject PRJNA624356
+                   Accessions: SRR11537952–SRR11537959
+  Reference genome: hg38 downloaded from UCSC Genome Browser
+
+Code:
+  Nextflow pipeline : nextflow/main.nf + nextflow/modules/*.nf
+  Preprocessing     : scripts/01_preprocess.py
+  Feature extraction: scripts/02_extract_features.py
+  Model training    : scripts/03_train_model.py
+  Evaluation        : scripts/04_evaluate.py
+  Visualisation     : scripts/05_visualise.py
+  Baseline training : scripts/train_baselines.py (new)
+  Publication metrics: scripts/compute_full_metrics.py (new)
+
+Trained model weights:
+  model/best_model.pt (744 KB, PyTorch checkpoint)
+  Trained on: GEO GSE149438, n=255 (train+val merged)
+  Test AUC-ROC: 0.921, AUPRC: 0.984
+
+Key result files:
+  results/training_summary.json      — CNN+LSTM 3-fold CV results
+  results/model_comparison_REAL.json — All baseline results (real training)
+  results/full_metrics_publication.json — Complete test-set metrics
+  results/class_imbalance_report.json — Imbalance analysis
+  results/metrics_corrected.json     — v2 corrected LR + CNN+LSTM metrics
+  results/metrics.json               — v1 LEAKED results (kept for comparison)
+
+To reproduce CNN+LSTM training from scratch:
+  1. cd liquid_biopsy_ai
+  2. python3 scripts/01_preprocess.py      # generates results/*.npy
+  3. python3 scripts/03_train_model.py     # trains model, saves model/best_model.pt
+  4. python3 scripts/04_evaluate.py        # generates figures
+  5. python3 scripts/train_baselines.py    # trains all baselines
+
+To reproduce baseline comparisons:
+  python3 scripts/train_baselines.py
+  (Requires: results/X_train.npy, X_val.npy, X_test.npy, y_*.npy)
+
+Estimated training time (CPU):
+  CNN+LSTM (3-fold CV): ~20 minutes
+  All baselines:        ~20 minutes
+  Total:                ~40 minutes
+
+Note: Best_model.pt is already included in the submission archive.
+      Re-running training will produce numerically identical results
+      given the same software versions and random seeds.
+      Minor differences may occur across PyTorch versions.
+
+Nextflow pipeline reproducibility:
+  The Nextflow pipeline is fully resumable (-resume flag).
+  Pipeline hash cache is in .nextflow/ (excluded from submission zip).
+  To reproduce: re-run with the same FASTQs and reference genome.
+  SRA accessions: SRR11537952, SRR11537953, SRR11537954 (human-mapping)
+                  SRR11537955–59 (non-human, <6% mapping to hg38)
