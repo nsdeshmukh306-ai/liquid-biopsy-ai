@@ -1,0 +1,79 @@
+{
+  "PSA (Prostate Ca.)": {
+    "sensitivity": 0.7,
+    "specificity": 0.9,
+    "auc": 0.78,
+    "test_type": "Protein biomarker",
+    "cancer_type": "Prostate",
+    "source": "Thompson et al., NEJM 2004; Andriole et al., NEJM 2009",
+    "note": "Sensitivity/specificity at PSA >4 ng/mL threshold",
+    "fnr": 0.3,
+    "fpr": 0.1
+  },
+  "CA-125 (Ovarian Ca.)": {
+    "sensitivity": 0.79,
+    "specificity": 0.78,
+    "auc": 0.85,
+    "test_type": "Protein biomarker",
+    "cancer_type": "Ovarian",
+    "source": "Jacobs et al., BMJ 1999",
+    "note": "Single-marker screening performance",
+    "fnr": 0.21,
+    "fpr": 0.22
+  },
+  "CEA (Colorectal Ca.)": {
+    "sensitivity": 0.46,
+    "specificity": 0.89,
+    "auc": 0.73,
+    "test_type": "Protein biomarker",
+    "cancer_type": "Colorectal",
+    "source": "Fletcher, Ann Intern Med 1986; meta-analysis",
+    "note": "Preoperative CEA for CRC detection",
+    "fnr": 0.54,
+    "fpr": 0.11
+  },
+  "CA 19-9 (Pancreatic Ca.)": {
+    "sensitivity": 0.79,
+    "specificity": 0.82,
+    "auc": 0.87,
+    "test_type": "Protein biomarker",
+    "cancer_type": "Pancreatic",
+    "source": "Goonetilleke & Siriwardena, Eur J Surg Oncol 2007",
+    "note": "CA 19-9 for PDAC detection",
+    "fnr": 0.21,
+    "fpr": 0.18
+  },
+  "Galleri (Multi-cancer)": {
+    "sensitivity": 0.515,
+    "specificity": 0.995,
+    "auc": 0.92,
+    "test_type": "cfDNA methylation",
+    "cancer_type": "Multi-cancer (50+)",
+    "source": "Consortium et al., Ann Oncol 2021 (CCGA3)",
+    "note": "Galleri commercial cfDNA test, all cancer stages",
+    "fnr": 0.485,
+    "fpr": 0.005
+  },
+  "CancerSEEK (Multi-cancer)": {
+    "sensitivity": 0.7,
+    "specificity": 0.99,
+    "auc": 0.93,
+    "test_type": "cfDNA + proteins",
+    "cancer_type": "Multi-cancer (8)",
+    "source": "Cohen et al., Science 2018",
+    "note": "Stage I-III; 8 cancer types",
+    "fnr": 0.3,
+    "fpr": 0.01
+  },
+  "LiquidBiopsyNet (This study, GI)": {
+    "sensitivity": 0.831,
+    "specificity": 0.913,
+    "auc": 0.943,
+    "test_type": "cfDNA fragment + methylation",
+    "cancer_type": "GI cancers (6 subtypes)",
+    "source": "5-fold StratifiedKFold CV, GEO GSE149438 n=300",
+    "note": "Aggregate CV result; trained/tested on confirmed cancer patients",
+    "fnr": 0.169,
+    "fpr": 0.087
+  }
+}

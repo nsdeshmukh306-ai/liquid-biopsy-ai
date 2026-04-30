@@ -1,0 +1,57 @@
+{
+  "mean_frag_len": {
+    "geo_mean": 148.72405945145695,
+    "geo_std": 12.1355585031513,
+    "nf_mean": 171.92107597567414,
+    "nf_std": 3.8428285309747325,
+    "abs_mean_diff": 23.19701652421719,
+    "kl_geo_to_nf": 18.736697269160437,
+    "kl_nf_to_geo": 9.675889049757343,
+    "js_distance": 0.8033483598303967
+  },
+  "std_frag_len": {
+    "geo_mean": 26.02620820322523,
+    "geo_std": 3.695982790690831,
+    "nf_mean": 41.31238511006317,
+    "nf_std": 0.4560188305760257,
+    "abs_mean_diff": 15.286176906837937,
+    "kl_geo_to_nf": 20.36244315983533,
+    "kl_nf_to_geo": 23.09748513994222,
+    "js_distance": 0.8325545988462012
+  },
+  "short_frag_ratio": {
+    "geo_mean": 0.5241333333333333,
+    "geo_std": 0.1842993458721134,
+    "nf_mean": 0.33933136013773696,
+    "nf_std": 0.04053511514265595,
+    "abs_mean_diff": 0.18480197319559638,
+    "kl_geo_to_nf": 22.0613003651237,
+    "kl_nf_to_geo": 3.009339602880874,
+    "js_distance": 0.7677942728375601
+  },
+  "mean_gc": {
+    "geo_mean": 0.4977150464996392,
+    "geo_std": 0.041184529884422685,
+    "nf_mean": 0.5091703449060122,
+    "nf_std": 0.005836741574427961,
+    "abs_mean_diff": 0.011455298406372993,
+    "kl_geo_to_nf": 23.3248141821153,
+    "kl_nf_to_geo": 2.9485657522656807,
+    "js_distance": 0.7647597813376028
+  },
+  "nuc_score": {
+    "geo_mean": 0.35436410322644024,
+    "geo_std": 0.22745878409300943,
+    "nf_mean": 1528648.0,
+    "nf_std": 196744.69741435643,
+    "unit_note": "GEO: normalised 0-1 score; NF: raw read counts (~1.5M). Direct comparison is invalid \u2014 different normalisation.",
+    "scale_ratio": 4313777.794224855
+  },
+  "frag_bins": {
+    "geo_peak_bin": 0,
+    "nf_peak_bin": 17,
+    "peak_bin_shift": 17,
+    "js_distance_mean_profiles": 0.3047848332516733,
+    "note": "GEO bins span ~100-250 bp (methylation-seq library prep). NF bins span ~50-500 bp (WGS). Same bin index = different bp ranges. Profile JS-divergence = 0.3048."
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "dataset": "GEO GSE149438, n=300",
+  "n_cancer": 254,
+  "n_healthy": 46,
+  "n_total": 300,
+  "cancer_fraction": 0.8466666666666667,
+  "healthy_fraction": 0.15333333333333332,
+  "dummy_accuracy_majority_class": 0.8466666666666667,
+  "cnn_lstm_accuracy": 0.886,
+  "cnn_lstm_auc_roc": 0.895,
+  "margin_above_dummy_accuracy": 0.03933333333333333,
+  "primary_metric_recommendation": "AUC-ROC and balanced_accuracy",
+  "note": "With 84.7% cancer prevalence, a trivial classifier achieves 84.7% accuracy. The CNN+LSTM margin above this baseline is only 3.9 percentage points. AUC-ROC is the appropriate primary metric for this imbalanced dataset."
+}

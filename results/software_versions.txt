@@ -1,0 +1,13 @@
+fastqc                                     0.12.1             hdfd78af_0            bioconda
+matplotlib-base                            3.10.8             py313h683a580_0       conda-forge
+nextflow                                   25.10.4            h2a3209d_0            bioconda
+numpy                                      2.4.3              py313hf6604e3_0       conda-forge
+pandas                                     3.0.2              py313hbfd7664_0       conda-forge
+pysam                                      0.23.3             py313hd07c5dd_2       bioconda
+samtools                                   1.23.1             ha83d96e_0            bioconda
+scipy                                      1.17.1             py313h4b8bb8b_0       conda-forge
+Python 3.13.12
+torch 2.11.0+cpu
+scikit-learn 1.8.0
+Version: 0.7.17-r1188
+0.39

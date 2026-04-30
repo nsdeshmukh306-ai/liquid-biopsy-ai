@@ -1,0 +1,56 @@
+{
+  "Dummy (Majority)": {
+    "auc": 0.5,
+    "auc_std": 0.0,
+    "acc": 0.8470588235294118,
+    "acc_std": 0.0,
+    "bal_acc": 0.5,
+    "bal_acc_std": 0.0,
+    "note": "Always predicts majority class (cancer). AUC=0.5 by construction."
+  },
+  "Logistic Regression": {
+    "auc": 0.9693732193732193,
+    "auc_std": 0.01470931369520186,
+    "acc": 0.9176470588235294,
+    "acc_std": 0.009605842128561493,
+    "bal_acc": 0.8463319088319089,
+    "bal_acc_std": 0.044889456344250525,
+    "note": "class_weight=balanced, max_iter=2000"
+  },
+  "Random Forest": {
+    "auc": 0.9878917378917379,
+    "auc_std": 0.005608267716532628,
+    "acc": 0.9529411764705883,
+    "acc_std": 0.01921168425712294,
+    "bal_acc": 0.8461538461538461,
+    "bal_acc_std": 0.06280742930213282,
+    "note": "class_weight=balanced, n_estimators=100"
+  },
+  "CNN Only": {
+    "auc": 0.8454415954415954,
+    "auc_std": 0.03751337345374276,
+    "acc": 0.8274509803921569,
+    "acc_std": 0.045395438834471495,
+    "bal_acc": 0.751068376068376,
+    "bal_acc_std": 0.02153159937942991,
+    "note": "Trained 3-fold CV. First real run."
+  },
+  "LSTM Only": {
+    "auc": 0.9458689458689459,
+    "auc_std": 0.014182555378732156,
+    "acc": 0.8784313725490196,
+    "acc_std": 0.011091871077436052,
+    "bal_acc": 0.8652065527065528,
+    "bal_acc_std": 0.020328800750017938,
+    "note": "Trained 3-fold CV. First real run."
+  },
+  "CNN+LSTM (Ours)": {
+    "auc": 0.894907908992416,
+    "auc_std": 0.03215171016837121,
+    "acc": 0.8214285714285715,
+    "acc_std": 0.0673435029701474,
+    "bal_acc": 0.8214285714285715,
+    "bal_acc_std": 0.0673435029701474,
+    "note": "From results/training_summary.json (3-fold CV, GEO n=300)"
+  }
+}

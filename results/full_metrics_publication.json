@@ -1,0 +1,23 @@
+{
+  "dataset": "GEO GSE149438, n=300, test n=45, externally preprocessed",
+  "model": "CNN+LSTM (LiquidBiopsyNet v2)",
+  "auc_roc": 0.9210526315789473,
+  "auprc": 0.9837656022148524,
+  "auprc_random_baseline": 0.8444444444444444,
+  "balanced_accuracy": 0.8759398496240601,
+  "accuracy": 0.8888888888888888,
+  "f1_macro": 0.8186946011281224,
+  "f1_weighted": 0.8964097054346852,
+  "sensitivity_cancer_recall": 0.8947368421052632,
+  "specificity_healthy_recall": 0.8571428571428571,
+  "ppv_cancer_precision": 0.9714285714285714,
+  "npv_healthy_precision": 0.6,
+  "confusion_matrix": {
+    "tp": 34,
+    "tn": 6,
+    "fp": 1,
+    "fn": 4
+  },
+  "note_lr_perfect_auc": "Logistic Regression achieved AUC=1.0 on this 45-sample test set. This is an artifact of the small test set (38 cancer / 7 healthy) and strong linear separability of GEO fragment features. LR 3-fold CV AUC=0.975\u00b10.014 is the more reliable estimate.",
+  "note_class_imbalance": "84.7% cancer prevalence. Dummy classifier accuracy = 84.7%. CNN+LSTM accuracy (88.6%) is only 3.9pp above dummy. AUC-ROC and AUPRC are the primary metrics."
+}

@@ -1,0 +1,34 @@
+{
+  "n_folds": 5,
+  "n_samples": 300,
+  "seed": 42,
+  "cv_auc_mean": 0.943269716775599,
+  "cv_auc_std": 0.015020952541069145,
+  "cv_auc_per_fold": [
+    0.9150326797385621,
+    0.9542483660130718,
+    0.9411764705882352,
+    0.9498910675381264,
+    0.956
+  ],
+  "cv_acc_mean": 0.8433333333333334,
+  "cv_acc_std": 0.027080128015453203,
+  "cv_acc_per_fold": [
+    0.8166666666666667,
+    0.8833333333333333,
+    0.8333333333333334,
+    0.8166666666666667,
+    0.8666666666666667
+  ],
+  "cv_bal_acc_mean": 0.872078431372549,
+  "cv_bal_acc_std": 0.04320886114647621,
+  "cv_bal_acc_per_fold": [
+    0.8006535947712419,
+    0.9313725490196079,
+    0.8562091503267973,
+    0.892156862745098,
+    0.88
+  ],
+  "mean_stopped_epoch": 18.2,
+  "note": "5-fold StratifiedKFold on all 300 GEO samples (GSE149438). Scaler fit inside each fold on train split only. Primary reported result replacing 3-fold CV on 255-sample subset."
+}

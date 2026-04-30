@@ -1,0 +1,19 @@
+INVALID RUN — DO NOT USE
+========================
+
+File: results/real_data_info.json
+Issue: The retrain script (retrain_real.sh) attempted to train on
+       data/real_feature_matrix.csv (8 BAM samples) but found no
+       ground-truth label column. The label auto-detection code
+       selected "motif_TTTC" — a continuous frequency feature
+       (range: 0.002–0.006) — as the binary classification target.
+
+Any model trained with motif_TTTC as the target label is
+biologically meaningless and statistically invalid.
+
+Valid trained model: model/best_model.pt
+Trained on:         data/feature_matrix.csv (GEO GSE149438, n=300)
+Label column:       cancer_label (binary 0/1, validated)
+CV AUC-ROC:         0.895 ± 0.032 (3-fold StratifiedKFold)
+
+Generated: 2026-04-24

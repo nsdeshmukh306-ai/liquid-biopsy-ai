@@ -1,0 +1,22 @@
+{
+  "cv_accuracy_mean": 0.8214285714285715,
+  "cv_accuracy_std": 0.0673435029701474,
+  "cv_auc_mean": 0.894907908992416,
+  "cv_auc_std": 0.03215171016837121,
+  "cv_per_fold_acc": [
+    0.8690476190476191,
+    0.8690476190476191,
+    0.7261904761904762
+  ],
+  "cv_per_fold_auc": [
+    0.8515709642470206,
+    0.90465872156013,
+    0.9284940411700975
+  ],
+  "test_accuracy": 0.8863636363636364,
+  "test_auc": 0.8991228070175438,
+  "n_params": 186050,
+  "n_folds": 3,
+  "leakage_fix": "scaler fit inside each fold on CV-train split",
+  "regularisation": "Dropout=0.5, L2=1e-4, reduced capacity (GAP)"
+}
