@@ -1,0 +1,48 @@
+{
+  "internal_GEO_GSE149438": {
+    "n": 45,
+    "n_cancer": 38,
+    "n_healthy": 7,
+    "auc": 0.9211,
+    "balanced_accuracy": 0.8759,
+    "sensitivity": 0.8947,
+    "specificity": 0.8571
+  },
+  "external_PRJNA291063_JiangHCC": {
+    "n": 3,
+    "n_cancer": 2,
+    "n_healthy": 1,
+    "auc": 0.0,
+    "auc_interpretation": "ARTIFACT \u2014 feature pipeline incompatibility (see diagnostic_note)",
+    "balanced_accuracy": 0.5,
+    "sensitivity": 1.0,
+    "specificity": 0.0,
+    "per_sample": [
+      {
+        "sample": "PRJNA291063_IH03",
+        "true_label": 0,
+        "pred_label": 1,
+        "prob_cancer": 0.9996,
+        "fragment_mode_bp": 167.0
+      },
+      {
+        "sample": "PRJNA291063_IC05",
+        "true_label": 1,
+        "pred_label": 1,
+        "prob_cancer": 0.9994,
+        "fragment_mode_bp": 167.0
+      },
+      {
+        "sample": "PRJNA291063_IC08",
+        "true_label": 1,
+        "pred_label": 1,
+        "prob_cancer": 0.9988,
+        "fragment_mode_bp": 167.0
+      }
+    ]
+  },
+  "generalisation_gap_auc": null,
+  "generalisation_verdict": "INDETERMINATE \u2014 feature pipeline incompatibility prevents valid measurement",
+  "diagnostic_note": "External AUC=0.0 is a feature pipeline incompatibility artifact, NOT a biological finding. Training features (GEO GSE149438) are discretised at 0.01 resolution (consistent with ~100 reads per sample), while our Nextflow pipeline extracts smooth continuous histograms from 350K+ aligned fragments. After scaling with the training scaler: training-test features range [-2.58, +14.46], external features range [-12.76, +2.61]. The model receives out-of-distribution inputs and defaults to P(cancer)\u22480.999 for all samples (the majority class at 84.7% in training). Additionally, n=3 is statistically insufficient for AUC estimation regardless of the pipeline mismatch. Valid external validation requires features extracted with the same pipeline as the training data, OR retraining on labelled BAM-derived features.",
+  "data_note": "External features: 1M-read-pair subsample (~15-25% depth) from PRJNA291063 FASTQs aligned to hg38 with BWA-MEM. Fragment lengths from TLEN field. 150 bins, 100-400bp, normalised to sum=1."
+}

@@ -1,0 +1,15 @@
+{
+  "PRJNA291063_downloaded": 3,
+  "PRJNA291063_aligned": 3,
+  "PRJNA291063_features_extracted": 3,
+  "GSE71378_downloaded": 5,
+  "GSE71378_compatible_with_model": false,
+  "GSE186210_downloaded": 1,
+  "GSE186210_compatible_with_model": false,
+  "FinaleDB_status": "blocked_403",
+  "external_validation_auc": 0.0,
+  "external_validation_auc_note": "ARTIFACT \u2014 feature pipeline incompatibility. See multicohort_expansion_log.txt",
+  "note_bigbed": "GSE71378 BigBed files contain WPS nucleosome footprints (7-150bp), NOT cfDNA fragment lengths. Not compatible with fragment-length model.",
+  "note_gse186210": "GSE186210 is mouse RNA-seq (54134 genes x 46 samples), not cfDNA.",
+  "note_pipeline_mismatch": "Training features from GEO GSE149438 are low-resolution (0.01 precision, ~100 reads/sample). External features from our pipeline are high-resolution (350K+ fragments, continuous). Zero-shot transfer fails due to covariate shift."
+}

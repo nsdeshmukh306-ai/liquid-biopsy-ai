@@ -1,0 +1,6 @@
+sample_id,label,cancer_type,cohort,study,data_type,n_footprints_sampled,wps_median_length,wps_mean_length,wps_pct_short_lt50,wps_mean_score,wps_median_score,NOTE
+GSE71378_BH01,0,healthy,GSE71378,Snyder2016,WPS_footprints,1000000,35.0,37.529411,0.807082,35.957964,34.0,"WPS footprints, NOT fragment lengths. Cannot be used with fragment-length model."
+GSE71378_CA01,1,colorectal,GSE71378,Snyder2016,WPS_footprints,1000000,39.0,40.672245,0.760921,212.028185,197.0,"WPS footprints, NOT fragment lengths. Cannot be used with fragment-length model."
+GSE71378_CH01,1,colorectal,GSE71378,Snyder2016,WPS_footprints,1000000,37.0,38.55348,0.793145,65.350371,61.0,"WPS footprints, NOT fragment lengths. Cannot be used with fragment-length model."
+GSE71378_IH01,0,healthy,GSE71378,Snyder2016,WPS_footprints,1000000,34.0,37.277346,0.804866,27.836447,26.0,"WPS footprints, NOT fragment lengths. Cannot be used with fragment-length model."
+GSE71378_IH02,0,healthy,GSE71378,Snyder2016,WPS_footprints,1000000,34.0,37.932811,0.790303,14.88163,14.0,"WPS footprints, NOT fragment lengths. Cannot be used with fragment-length model."
