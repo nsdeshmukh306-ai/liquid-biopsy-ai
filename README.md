@@ -1,266 +1,287 @@
-# 🧬 Liquid Biopsy AI — Cancer Detection from cfDNA
+# Liquid Biopsy AI — Non-Invasive Cancer Detection from cfDNA
 
-> Detecting cancer presence and subtype from cell-free DNA fragment patterns using a hybrid CNN + LSTM deep learning model trained on real GEO data.
-
-![Python](https://img.shields.io/badge/Python-3.10-blue?logo=python&logoColor=white)
-![PyTorch](https://img.shields.io/badge/PyTorch-2.x-EE4C2C?logo=pytorch&logoColor=white)
-![Nextflow](https://img.shields.io/badge/Nextflow-≥22.0-23AA4A?logo=nextflow&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-green)
-![Status](https://img.shields.io/badge/Status-Complete-brightgreen)
+> Deep Learning Mini Project · OMICS + Deep Learning · IISER Tirupati · AY 2025–26  
+> **Author:** Niraj (Roll No: 20254009)
 
 ---
 
-## 📌 Overview
+## Overview
 
-Liquid biopsy is a minimally invasive technique that detects cancer by analysing cell-free DNA (cfDNA) shed into the bloodstream by tumour cells. This project builds a complete end-to-end AI pipeline — from raw data download to trained model and publication-quality visualisations — to classify cancer presence and subtype from cfDNA methylation and fragment patterns.
+This project presents an end-to-end computational pipeline for **non-invasive cancer detection** from **cell-free DNA (cfDNA)** using a hybrid **CNN + LSTM** deep learning model.
 
-This project covers:
-- **OMICS mini project** — real cfDNA data processing and feature engineering
-- **Deep Learning mini project** — hybrid CNN + LSTM model in PyTorch
+cfDNA shed by tumour cells shows a distinct fragmentation pattern — enriched in short fragments (~132 bp) relative to the healthy mono-nucleosomal peak (~167 bp). This project exploits that signal to classify plasma samples as cancer or healthy.
 
----
+Two clearly separated components are implemented:
 
-## 📊 Results
-
-| Model | 5-Fold CV AUC | 5-Fold CV Accuracy |
-|---|---|---|
-| Logistic Regression (baseline) | 0.9749 ± 0.0141 | — |
-| **CNN + LSTM (this work)** | **0.9265 ± 0.0479** | **85.23 ± 6.74%** |
-
-> **Note:** LR achieves comparable AUC because the fragment length shift (167bp healthy → 132bp cancer) is a near-linear signal. CNN+LSTM shows greater advantage on raw BAM data with complex motif and sequence-level patterns — which is where this architecture is designed to shine.
-
-Both results fall within the published cfDNA cancer detection literature range of **AUC 0.85–0.97**.
+| Component | Description |
+|-----------|-------------|
+| **Bioinformatics Pipeline** | Nextflow DSL2: FastQC → Trimmomatic → BWA-MEM → samtools → fragment extraction. Applied to 8 real cfDNA WGS samples (NCBI SRA, PRJNA624356). |
+| **Machine Learning Pipeline** | CNN+LSTM trained and evaluated on GEO GSE149438 (n=300, 6 cancer subtypes). Leakage-free evaluation with 5-fold stratified CV. |
 
 ---
 
-## 🗂️ Dataset
+## Results at a Glance
 
-| Field | Detail |
-|---|---|
-| **Primary** | GSE149438 — NCBI GEO |
-| **Description** | cfDNA methylation profiles, cancer vs healthy controls |
-| **Samples** | 300 total: 254 cancer, 46 healthy |
-| **Cancer subtypes** | PDAC (74), ESCC (48), HCC (43), CRC (40), GC (37), EAC (12) |
-| **Features** | 159 methylation + fragment features per sample |
-| **Fallback** | GSE71378 (plasma cfDNA methylation) |
+### 5-Fold Stratified Cross-Validation (GEO GSE149438, n=300)
+
+| Model | CV AUC-ROC | CV Balanced Acc |
+|-------|-----------|----------------|
+| Dummy (majority class) | 0.500 ± 0.000 | 0.500 ± 0.000 |
+| CNN Only | 0.844 ± 0.037 | 0.753 ± 0.023 |
+| **CNN + LSTM (Ours)** | **0.943 ± 0.015** | **0.872 ± 0.043** |
+| LSTM Only | 0.946 ± 0.014 | 0.865 ± 0.020 |
+| Logistic Regression | 0.969 ± 0.015 | 0.846 ± 0.045 |
+| Random Forest | 0.988 ± 0.006 | 0.846 ± 0.063 |
+
+### Held-Out Test Set — CNN+LSTM (n=45)
+
+| Metric | Value |
+|--------|-------|
+| AUC-ROC | **0.921** |
+| AUPRC | **0.984** (random baseline: 0.844) |
+| Sensitivity (cancer recall) | 0.895 (34/38 detected) |
+| Specificity (healthy recall) | 0.857 (6/7 detected) |
+| Balanced Accuracy | 0.876 |
+| Confusion Matrix | TP=34, FP=1, FN=4, TN=6 |
+
+> **Honest note:** Random Forest (AUC 0.988) and LSTM-only (0.946) outperform the CNN+LSTM hybrid on this tabular histogram feature set — expected behaviour for low-dimensional tabular data. The CNN+LSTM architecture would gain more advantage on raw sequence or multi-modal inputs.
 
 ---
 
-## 🏗️ Project Structure
+## Model Architecture
 
 ```
-liquid_biopsy_ai/
-├── README.txt                        # Server-side documentation
-├── data/
-│   ├── download_data.sh              # Auto-downloads GSE149438 from NCBI GEO
-│   ├── accessions.txt                # All dataset sources and SRR accessions
-│   └── data_schema.txt              # Auto-detected real column names
-├── nextflow/
-│   ├── main.nf                       # Main Nextflow pipeline
-│   ├── nextflow.config               # HPC config (32 CPUs, 64GB RAM, resume)
-│   └── modules/
-│       ├── fastqc.nf                 # Quality control
-│       ├── trim.nf                   # Adapter trimming (Trimmomatic)
-│       ├── align.nf                  # BWA-MEM alignment to hg38
-│       └── features.nf              # Fragment + methylation feature extraction
-├── scripts/
-│   ├── 01_preprocess.py             # Load, normalise, split data
-│   ├── 02_extract_features.py       # Fragment histograms, end motifs, CpG density
-│   ├── 03_train_model.py            # CNN+LSTM training with early stopping
-│   ├── 04_evaluate.py               # AUC, F1, confusion matrix, ROC curves
-│   └── 05_visualise.py             # 7 publication-quality plots at 300 DPI
-├── model/
-│   ├── model_architecture.py        # LiquidBiopsyNet class (PyTorch)
-│   └── best_model.pt                # Saved weights (best validation AUC)
-├── notebooks/
-│   └── LiquidBiopsyAI.ipynb        # Full Colab-ready notebook
-├── results/
-│   ├── training_history.csv         # Loss + accuracy per epoch
-│   └── metrics_corrected.json       # Final 5-fold CV metrics
-└── report/
-    └── figures/                     # All 7 PNG plots at 300 DPI
-```
-
----
-
-## 🧠 Model Architecture
-
-```
-Input: Fragment length histogram (150 bins)
+Input: cfDNA Fragment Length Histogram (150 bins, 100–400 bp)
         │
-        ├─────────────────────┬──────────────────────┐
-        │                     │                      │
-   CNN Branch            LSTM Branch                 │
-   Conv1d(1→32, k=7)     LSTM(150, 64,               │
-   ReLU + MaxPool         layers=2,                  │
-   Conv1d(32→64, k=5)    bidirectional=True)         │
-   ReLU + MaxPool                │                   │
-   Conv1d(64→128, k=3)           │                   │
-   GlobalAvgPool                 │                   │
-        │                        │                   │
-        └────────────┬───────────┘                   │
-                     │                               │
-              Fusion Layer                           │
-              Linear(384→128) + ReLU                │
-              Dropout(0.5)                           │
-              Linear(128→64) + ReLU                 │
-              Linear(64→num_classes)                │
-                     │
-              Cancer Type Probabilities
-              (PDAC / ESCC / HCC / CRC / GC / EAC / Healthy)
-```
+        ├──── CNN Branch ────────────────────────────────────────┐
+        │     Conv1D(1→32, k=7) → BN → ReLU → MaxPool           │
+        │     Conv1D(32→64, k=5) → BN → ReLU → MaxPool          │
+        │     Conv1D(64→128, k=3) → BN → ReLU → GlobalAvgPool   │
+        │     Output: 128-dim                                     │
+        │                                                         ▼
+        └──── LSTM Branch ──────────────────────────────► Concat (256-dim)
+              BiLSTM(input=1, hidden=64, layers=2)                │
+              Final hidden: concat(h_fwd, h_bwd)                  │
+              Output: 128-dim                              Linear(256→64)
+                                                          BN → ReLU → Dropout(0.5)
+                                                          Linear(64→2)
+                                                          Softmax → P(cancer)
 
-**Parameters:** 186,050 trainable | **Training:** 50 epochs, Adam lr=0.001, early stopping patience=10
+Total parameters: 186,050
+Regularisation:   Dropout=0.5, L2=1×10⁻⁴, BatchNorm at every layer
+```
 
 ---
 
-## ⚙️ How to Run
+## Repository Structure
 
-### Prerequisites
+```
+liquid-biopsy-ai/
+├── model/
+│   ├── model_architecture.py       # LiquidBiopsyNet v2 (PyTorch)
+│   └── best_model.pt               # Saved weights (best val AUC checkpoint)
+│
+├── scripts/
+│   ├── 01_preprocess.py            # Train/val/test split, StandardScaler
+│   ├── 02_extract_features.py      # Fragment length extraction from BAM
+│   ├── 03_train_model.py           # CNN+LSTM training with early stopping
+│   ├── 04_evaluate.py              # Test set evaluation, all metrics
+│   ├── 05_visualise.py             # ROC, PR, training curves, confusion matrix
+│   ├── 06_real_figures.py          # Fragment distribution from real BAMs
+│   ├── 07_cv5fold.py               # 5-fold stratified cross-validation
+│   ├── 08_covariate_shift.py       # Covariate shift analysis
+│   ├── 09_clinical_framing.py      # Clinical context comparison
+│   ├── train_baselines.py          # LR, RF, CNN-only, LSTM-only baselines
+│   ├── cross_cohort_validation.py  # Zero-shot validation on Jiang 2015 HCC
+│   ├── extract_bam_features.py     # Feature extraction from aligned BAMs
+│   ├── fix_all_issues.py           # Corrected figures (reviewer fixes)
+│   └── compute_full_metrics.py     # Full publication metrics
+│
+├── notebooks/
+│   └── LiquidBiopsyAI.ipynb        # End-to-end Jupyter walkthrough
+│
+├── data/
+│   ├── feature_matrix.csv          # GEO GSE149438 feature matrix (n=300)
+│   ├── real_feature_matrix.csv     # BAM-pipeline features (n=8, no labels)
+│   ├── accessions.txt              # SRA accession list
+│   ├── srr_list.txt                # SRR IDs
+│   ├── data_schema.txt             # Feature column definitions
+│   ├── features/                   # Per-sample feature CSVs (SRR*)
+│   └── processed_real/             # Train/val/test numpy arrays + scaler meta
+│
+├── results/
+│   ├── training_history.csv        # Per-fold training metrics
+│   ├── cv5fold_results.json        # 5-fold CV summary
+│   ├── metrics_corrected.json      # Final corrected test metrics
+│   ├── full_metrics_publication.json
+│   ├── classification_report.txt
+│   ├── software_versions.txt       # Exact package versions used
+│   └── validation/
+│       ├── cross_cohort_validation.json
+│       ├── jiang_hcc_features.csv
+│       └── snyder2016_wps_statistics.csv
+│
+├── figures/                        # All publication figures (300 DPI PNG)
+│   ├── training_curves.png
+│   ├── roc_curve.png
+│   ├── precision_recall_curve.png
+│   ├── confusion_matrix.png
+│   ├── model_comparison_REAL.png
+│   ├── cv5fold_results.png
+│   ├── feature_importance.png
+│   ├── sample_predictions.png
+│   ├── fragment_distribution.png
+│   ├── covariate_shift.png
+│   ├── cross_cohort_validation.png
+│   ├── clinical_comparison.png
+│   └── methylation_heatmap.png
+│
+├── pipeline/
+│   └── main.nf                     # Nextflow DSL2 bioinformatics pipeline
+│
+├── report/
+│   └── LiquidBiopsyAI_Report.docx  # Full project report
+│
+├── DATA_PROVENANCE.md              # Transparent data source documentation
+├── requirements.txt
+└── README.md
+```
+
+---
+
+## Quick Start
+
+### Requirements
+
 ```bash
-conda create -n liquid_biopsy python=3.10
-conda activate liquid_biopsy
-pip install torch torchvision scikit-learn pandas numpy matplotlib seaborn tqdm pysam scanpy anndata
+Python 3.10+
+PyTorch >= 1.13
+scikit-learn >= 1.0
+numpy, pandas, matplotlib, seaborn, pysam
 ```
 
-### Step 1 — Download real data (server)
+Install all dependencies:
+
 ```bash
-cd ~/niraj/liquid_biopsy_ai/data
-bash download_data.sh
-# Downloads GSE149438 from NCBI GEO (~150MB)
-# Auto-extracts and validates data schema
+pip install -r requirements.txt
 ```
 
-### Step 2 — Run Nextflow pipeline (server, needs BWA + hg38)
+### Run the full pipeline
+
 ```bash
-cd ~/niraj/liquid_biopsy_ai/nextflow
-nextflow run main.nf -resume
-# Max 32 CPUs, 64GB RAM — safe for shared servers
+# Step 1 — Preprocess features (train/val/test split)
+python scripts/01_preprocess.py
+
+# Step 2 — Train the CNN+LSTM model
+python scripts/03_train_model.py --epochs 50 --patience 10
+
+# Step 3 — Evaluate on held-out test set
+python scripts/04_evaluate.py
+
+# Step 4 — Generate all figures
+python scripts/05_visualise.py
+python scripts/fix_all_issues.py
+
+# Step 5 — 5-fold cross-validation
+python scripts/07_cv5fold.py
+
+# Step 6 — Baseline comparison (LR, RF, CNN-only, LSTM-only)
+python scripts/train_baselines.py
 ```
 
-### Step 3 — Preprocess data (server)
+All random states fixed to `seed=42` for full reproducibility.
+
+### Use the Jupyter notebook
+
 ```bash
-python scripts/01_preprocess.py \
-  --input data/GSE149438_features.csv \
-  --output data/processed/
+jupyter notebook notebooks/LiquidBiopsyAI.ipynb
 ```
 
-### Step 4 — Extract features (server)
-```bash
-python scripts/02_extract_features.py \
-  --bam_dir data/aligned/ \
-  --output data/cfDNA_features.csv
+The notebook walks through the entire pipeline end-to-end with explanations.
+
+---
+
+## Data Sources
+
+| Dataset | Accession | Description | Used for |
+|---------|-----------|-------------|----------|
+| GEO GSE149438 | [Link](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE149438) | cfDNA fragment features, n=300 (254 cancer, 46 healthy), 6 subtypes | **Model training & evaluation** |
+| NCBI SRA PRJNA624356 | SRR11537952–59 | Real cfDNA WGS FASTQs (8 samples) | Pipeline validation only (no labels) |
+| PRJNA291063 (Jiang 2015) | SRR2130005/07/28/36, SRR2130050-52 | HCC cfDNA WGS (4 cancer, 3 healthy) | Cross-cohort validation attempt |
+| hg38 (GRCh38) | UCSC | Human reference genome | BWA-MEM alignment |
+
+> Raw FASTQ/BAM files and the reference genome are not included in this repository due to size (>30 GB). Use `data/accessions.txt` and `data/download_data.sh` to reproduce downloads.
+
+---
+
+## Figures
+
+| Figure | Description |
+|--------|-------------|
+| ![ROC](figures/roc_curve.png) | ROC curves — CNN+LSTM (AUC=0.921) vs Logistic Regression |
+| ![CM](figures/confusion_matrix.png) | Confusion matrix on held-out test set |
+| ![Training](figures/training_curves.png) | Training history — loss, accuracy, AUC per epoch |
+| ![CV](figures/cv5fold_results.png) | 5-fold CV AUC per fold |
+| ![Model comparison](figures/model_comparison_REAL.png) | All model comparison |
+| ![Samples](figures/sample_predictions.png) | 10 individual sample predictions |
+| ![PR](figures/precision_recall_curve.png) | Precision-Recall curve (AUPRC=0.984) |
+| ![Features](figures/feature_importance.png) | Random Forest feature importance (top 20 bins) |
+| ![Fragment](figures/fragment_distribution.png) | cfDNA fragment length distribution |
+
+---
+
+## Bioinformatics Pipeline
+
+The Nextflow DSL2 pipeline (`pipeline/main.nf`) processes raw cfDNA FASTQ files:
+
+```
+FASTQ → FastQC → Trimmomatic → BWA-MEM (hg38) → samtools sort/markdup → Fragment extraction
 ```
 
-### Step 5 — Train model (Colab recommended, CPU works too)
-```bash
-python scripts/03_train_model.py \
-  --data data/processed/ \
-  --output model/
-# Opens Google Colab: Runtime → Run All
-```
-
-### Step 6 — Evaluate
-```bash
-python scripts/04_evaluate.py \
-  --model model/best_model.pt \
-  --data data/processed/ \
-  --output results/
-```
-
-### Step 7 — Visualise
-```bash
-python scripts/05_visualise.py \
-  --results results/ \
-  --output report/figures/
-```
-
-### Run everything on Google Colab
-```
-Open notebooks/LiquidBiopsyAI.ipynb → File → Open in Colab
-First cell installs all dependencies automatically
-```
+Three of eight SRA samples (SRR11537952–54) achieved **97% alignment to hg38**, confirming human cfDNA origin. A dominant fragment length peak at **~168 bp** was observed — consistent with mono-nucleosomal cfDNA in healthy plasma.
 
 ---
 
-## 📈 Visualisations
+## Key Limitations
 
-The pipeline generates 7 publication-quality figures saved at 300 DPI:
+1. **Data source mismatch** — bioinformatics pipeline (SRA, n=8) and ML model (GEO, n=300) use separate datasets not joined due to absent ground-truth labels on SRA samples
+2. **Class imbalance** — 84.7% cancer in GEO dataset; accuracy alone is misleading (dummy achieves 84.7%)
+3. **External validation inconclusive** — feature resolution mismatch between GEO and BAM-pipeline histograms prevents zero-shot transfer
+4. **Small test set** — only 7 healthy samples in held-out set; specificity/NPV carry wide uncertainty
+5. **Random Forest outperforms CNN+LSTM** — expected on tabular histogram features; CNN+LSTM advantage expected on raw sequence or multi-modal inputs
 
-| File | Description |
-|---|---|
-| `training_curves.png` | Train/val loss and accuracy over 50 epochs |
-| `fragment_distribution.png` | Healthy (167bp) vs cancer (132bp) fragment peaks |
-| `confusion_matrix.png` | Per-class heatmap with counts and percentages |
-| `roc_curve.png` | ROC curve per cancer subtype with AUC scores |
-| `model_comparison.png` | LR vs RF vs CNN vs LSTM vs CNN+LSTM |
-| `feature_importance.png` | Top contributing cfDNA features |
-| `methylation_heatmap.png` | CpG methylation patterns across cancer subtypes |
+See `DATA_PROVENANCE.md` for full transparency on all data decisions.
 
 ---
 
-## 🔬 Biology Behind the Model
+## Software Versions
 
-cfDNA from cancer patients shows distinct fragment patterns compared to healthy individuals:
-
-- **Healthy cfDNA** — peaks at **167bp** (protected by nucleosomes)
-- **Cancer cfDNA** — peaks at **132bp** (shorter, from apoptotic tumour cells)
-- **Methylation** — tumour-specific CpG hypermethylation is detectable in plasma
-- **End motifs** — 4-mer frequencies at fragment ends carry tissue-of-origin signal
-
-These are the same biomarkers used in published clinical liquid biopsy studies (Cristiano et al., *Nature* 2019; Liu et al., *Nature* 2020).
-
----
-
-## ⚠️ Limitations
-
-This is a **research mini project**, not a clinical tool. Known limitations:
-
-- Features derived from GEO processed methylation matrices, not raw BAM alignment (no wet lab sequencing)
-- Small sample size (n=300) — clinical studies use thousands of samples
-- No independent external validation cohort
-- Synthetic fragment features generated from biologically realistic distributions where real BAM files were unavailable
-- Not validated for clinical use
+| Tool | Version |
+|------|---------|
+| Python | 3.13.12 |
+| PyTorch | 2.11.0 |
+| scikit-learn | 1.8.0 |
+| numpy | 2.4.3 |
+| pandas | 3.0.2 |
+| BWA | 0.7.17 |
+| samtools | 1.23.1 |
+| Nextflow | 25.10.4 |
+| FastQC | 0.12.1 |
+| Trimmomatic | 0.39 |
 
 ---
 
-## 🛠️ Technical Stack
+## References
 
-| Component | Tool |
-|---|---|
-| Language | Python 3.10 |
-| Deep Learning | PyTorch 2.x |
-| Pipeline | Nextflow ≥ 22.0 |
-| Omics | scanpy, anndata, pysam |
-| ML Baselines | scikit-learn |
-| Visualisation | matplotlib, seaborn |
-| Data | pandas, numpy |
-| Progress | tqdm |
-| Alignment | BWA-MEM (hg38) |
-| QC | FastQC, Trimmomatic |
+1. Chen et al. (2020). Non-invasive early detection of cancer four years before conventional diagnosis. *Nature Communications*, 11, 3475.
+2. Jiang et al. (2015). Lengthening and shortening of plasma DNA in hepatocellular carcinoma patients. *PNAS*, 112(11), E1317–E1325.
+3. Cristiano et al. (2019). Genome-wide cell-free DNA fragmentation in patients with cancer. *Nature*, 570, 385–389.
+4. Cohen et al. (2018). Detection and localization of surgically resectable cancers with a multi-analyte blood test. *Science*, 359, 926–930.
+5. Snyder et al. (2016). Cell-free DNA comprises an in vivo nucleosome footprint. *Cell*, 164, 57–68.
+6. Di Tommaso et al. (2017). Nextflow enables reproducible computational workflows. *Nature Biotechnology*, 35, 316–319.
 
 ---
 
-## 📚 References
+## License
 
-1. Cristiano, S. et al. (2019). Genome-wide cell-free DNA fragmentation in patients with cancer. *Nature*, 570, 385–389.
-2. Liu, M.C. et al. (2020). Sensitive and specific multi-cancer detection and localization using methylation signatures in cell-free DNA. *Annals of Oncology*, 31(6), 745–759.
-3. GSE149438 — NCBI GEO: cfDNA methylation profiles across 6 cancer types vs healthy controls.
-
----
-
-## 👤 Author
-
-**Niraj** — Bioinformatics & Deep Learning Mini Project
-Institution: IISER Tirupati
-Contact: niraj_20254009@students.iisertirupa.ac.in
-
----
-
-## 📄 License
-
-MIT License — free to use, modify, and distribute with attribution.
-
----
-
-*Built with Claude Code on a shared Linux server via SSH. Real data, real biology, honest results.*
+This project is for academic coursework at IISER Tirupati. Data from GEO GSE149438 is subject to the original study's data use terms.

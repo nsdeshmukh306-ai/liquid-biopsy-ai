@@ -75,7 +75,7 @@ def load_data(data_dir):
 
 def make_loader(X, y, batch_size, shuffle=True):
     ds = TensorDataset(torch.FloatTensor(X), torch.LongTensor(y))
-    return DataLoader(ds, batch_size=batch_size, shuffle=shuffle, drop_last=False)
+    return DataLoader(ds, batch_size=batch_size, shuffle=shuffle, drop_last=True)
 
 
 def build_model(input_len, num_classes, device):

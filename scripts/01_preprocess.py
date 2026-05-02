@@ -142,6 +142,10 @@ def load_real_data(data_dir, schema):
     for path in candidates:
         print(f"[LOAD] Trying: {path}")
         try:
+            # DATA SOURCE: GEO pre-processed matrix (original paper authors) — NOT from our BAM pipeline
+            # The feature matrix loaded here (data/feature_matrix.csv, n=300) was downloaded from
+            # GEO (GSE149438) and pre-processed by the original study's authors. Our Nextflow pipeline
+            # independently produced 8-sample features in results/nextflow/feature_matrix.csv.
             df = pd.read_csv(path, sep=sep, index_col=0)
             if df.shape[0] < 10 or df.shape[1] < 5:
                 print("       [SKIP] Too small")

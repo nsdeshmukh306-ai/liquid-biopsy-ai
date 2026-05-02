@@ -76,6 +76,10 @@ def load_or_synthetic(results_dir, features_csv):
         })
 
     # Feature matrix
+    # DATA SOURCE: GEO pre-processed matrix (original paper authors) — NOT from our BAM pipeline
+    # results/cfDNA_features.csv (n=300) originates from GSE149438 and was pre-processed by the
+    # original study's authors. Our Nextflow BAM pipeline produced 8-sample features separately
+    # (results/nextflow/feature_matrix.csv). Figures generated from this data are labelled accordingly.
     if os.path.exists(features_csv):
         df = pd.read_csv(features_csv)
         data['features'] = df
@@ -185,8 +189,8 @@ def plot_fragment_distribution(features_df, out_path):
             fontsize=10, ha='left', fontweight='bold')
 
     ax.set_xlabel('Fragment Length (bp)'); ax.set_ylabel('Frequency (normalised)')
-    ax.set_title('cfDNA Fragment Length Distribution: Healthy vs Cancer',
-                 fontsize=14, fontweight='bold')
+    ax.set_title('cfDNA Fragment Length Distribution: Healthy vs Cancer\n— GEO Dataset (n=300, external preprocessing by original authors)',
+                 fontsize=13, fontweight='bold')
     ax.legend(fontsize=12); ax.grid(alpha=0.3)
 
     plt.tight_layout()
@@ -370,8 +374,8 @@ def plot_methylation_heatmap(features_df, out_path):
     ax.text(n_h + n_c/2, -1.5, 'Cancer',    ha='center', fontsize=11, fontweight='bold', color='#e74c3c')
 
     ax.set_xlabel('Sample', fontsize=12); ax.set_ylabel('Genomic Region', fontsize=12)
-    ax.set_title('CpG Methylation Patterns — cfDNA (Healthy vs Cancer)',
-                 fontsize=14, fontweight='bold')
+    ax.set_title('CpG Methylation Patterns — cfDNA (Healthy vs Cancer)\n⚠ SIMULATED DATA (Beta distribution proxy — not measured from BAM files)',
+                 fontsize=12, fontweight='bold')
     ax.set_xticklabels(ax.get_xticklabels(), fontsize=7, rotation=90)
     ax.set_yticklabels(ax.get_yticklabels(), fontsize=8)
 

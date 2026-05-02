@@ -1,28 +1,65 @@
-# Large data files
-data/raw/
-data/*.tar.gz
-data/*.gz
+# Large sequencing data — download via data/accessions.txt
+data/fastq/
+data/aligned/
+data/sra_cache/
+data/external/
 data/*.bam
+data/*.bai
 data/*.fastq
+data/*.fastq.gz
 data/*.fq
-data/SRR*/
+data/*.fq.gz
+data/*.sam
 
-# Model weights
-model/best_model.pt
+# Reference genome (3.1 GB — download separately)
+data/ref/
+*.fa
+*.fa.gz
+*.fasta
+*.fasta.gz
 
-# Processed arrays
-data/processed/
-**/*.npy
+# Nextflow work directory (33 GB intermediates)
+nextflow/work/
+pipeline/work/
+.nextflow/
+.nextflow.log*
+.nextflow.pid
+
+# Large BigBed validation files
+data/validation/snyder_healthy/
 
 # Python cache
 __pycache__/
 *.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+
+# Conda / virtual envs
+.conda/
+venv/
+env/
+
+# Jupyter checkpoints
 .ipynb_checkpoints/
 
 # OS files
 .DS_Store
 Thumbs.db
+*.swp
 
-# Keep these
-!results/.gitkeep
-!report/figures/
+# Temp / build logs
+*.tmp
+.build_log.txt
+.pipeline_log.txt
+
+# Paper export (derived from report/figures — not source)
+paper_export/
+
+# Graphify output
+graphify-out/
+
+# Claude internal meta files
+CLAIM_AUDIT.md
+CLAUDE_PROJECT_BRIEFING.md
+generate_report.py

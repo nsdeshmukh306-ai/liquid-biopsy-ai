@@ -59,7 +59,8 @@ workflow {
 
     // ── 3. Adapter trimming ───────────────────────────────────────────────────
     if (!params.skip_trim) {
-        TRIMMOMATIC(ch_reads)
+        ch_adapters = file(params.adapters)
+        TRIMMOMATIC(ch_reads, ch_adapters)
         ch_trimmed = TRIMMOMATIC.out.reads
     } else {
         ch_trimmed = ch_reads
@@ -69,12 +70,17 @@ workflow {
     if (!params.skip_align && params.genome) {
         ch_genome = file(params.genome, checkIfExists: false)
 
-        // Index genome if not already indexed
-        if (!file("${params.genome}.bwt").exists()) {
+        // Use pre-built BWA index if available (params.bwa_index prefix), else build
+        def bwa_prefix = params.bwa_index ?: params.genome
+        if (file("${bwa_prefix}.bwt").exists()) {
+            log.info "Using pre-built BWA index: ${bwa_prefix}"
+            // Only stage the 5 BWA index files — NOT the .fa/.fa.gz (already in genome input)
+            def idx_files = ['amb','ann','bwt','pac','sa'].collect { file("${bwa_prefix}.${it}") }
+            ch_genome_index = Channel.of([ch_genome, idx_files])
+        } else {
+            log.info "Building BWA index (this takes ~90 min for hg38)..."
             BWA_INDEX(ch_genome)
             ch_genome_index = BWA_INDEX.out.index
-        } else {
-            ch_genome_index = Channel.of([ch_genome, file("${params.genome}.*")])
         }
 
         BWA_MEM(ch_trimmed, ch_genome_index.first())
