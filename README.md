@@ -3,6 +3,8 @@
 > Deep Learning Mini Project · OMICS + Deep Learning · IISER Tirupati · AY 2025–26  
 > **Author:** Niraj (Roll No: 20254009)
 
+> **Data provenance notice (added 2026-10-17).** GEO GSE149438 is a targeted DNA *methylation* study; its public files are per-sample methylation calls (`*_bsmap_meth.txt.gz`), not fragment-length data. The sample labels in `data/feature_matrix.csv` match GEO's sample metadata (tissue per sample, positional order, subtype counts). The 156 feature columns could not be traced to any GEO file, the script that built the matrix is not in this repository, and `data/data_schema.txt` describes them as "synthetic fragment features". Every metric below is therefore a result on that supplied matrix, and is **not** evidence of real-world cfDNA detection performance. See `DATA_PROVENANCE.md` and `REPRODUCE.md`.
+
 ---
 
 ## Overview
@@ -16,13 +18,13 @@ Two clearly separated components are implemented:
 | Component | Description |
 |-----------|-------------|
 | **Bioinformatics Pipeline** | Nextflow DSL2: FastQC → Trimmomatic → BWA-MEM → samtools → fragment extraction. Applied to 8 real cfDNA WGS samples (NCBI SRA, PRJNA624356). |
-| **Machine Learning Pipeline** | CNN+LSTM trained and evaluated on GEO GSE149438 (n=300, 6 cancer subtypes). Leakage-free evaluation with 5-fold stratified CV. |
+| **Machine Learning Pipeline** | CNN+LSTM trained and evaluated on `data/feature_matrix.csv` (n=300; labels from GEO GSE149438 metadata, 6 cancer subtypes; feature origin unverified, see notice above). Leakage-free evaluation with 5-fold stratified CV. |
 
 ---
 
 ## Results at a Glance
 
-### 5-Fold Stratified Cross-Validation (GEO GSE149438, n=300)
+### 5-Fold Stratified Cross-Validation (`feature_matrix.csv`, labels from GSE149438, n=300; feature provenance unverified)
 
 | Model | CV AUC-ROC | CV Balanced Acc |
 |-------|-----------|----------------|
@@ -101,7 +103,7 @@ liquid-biopsy-ai/
 │   └── LiquidBiopsyAI.ipynb        # End-to-end Jupyter walkthrough
 │
 ├── data/
-│   ├── feature_matrix.csv          # GEO GSE149438 feature matrix (n=300)
+│   ├── feature_matrix.csv          # feature matrix (n=300): labels from GEO GSE149438, feature origin unverified
 │   ├── real_feature_matrix.csv     # BAM-pipeline features (n=8, no labels)
 │   ├── accessions.txt              # SRA accession list
 │   ├── srr_list.txt                # SRR IDs
@@ -205,7 +207,7 @@ The notebook walks through the entire pipeline end-to-end with explanations.
 
 | Dataset | Accession | Description | Used for |
 |---------|-----------|-------------|----------|
-| GEO GSE149438 | [Link](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE149438) | cfDNA fragment features, n=300 (254 cancer, 46 healthy), 6 subtypes | **Model training & evaluation** |
+| GEO GSE149438 | [Link](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE149438) | Source of the sample labels only (254 cancer, 46 healthy, 6 subtypes). Public files are methylation calls, not fragment features | **Labels for model training & evaluation** |
 | NCBI SRA PRJNA624356 | SRR11537952–59 | Real cfDNA WGS FASTQs (8 samples) | Pipeline validation only (no labels) |
 | PRJNA291063 (Jiang 2015) | SRR2130005/07/28/36, SRR2130050-52 | HCC cfDNA WGS (4 cancer, 3 healthy) | Cross-cohort validation attempt |
 | hg38 (GRCh38) | UCSC | Human reference genome | BWA-MEM alignment |
@@ -245,7 +247,7 @@ Three of eight SRA samples (SRR11537952–54) achieved **97% alignment to hg38**
 ## Key Limitations
 
 1. **Data source mismatch** — bioinformatics pipeline (SRA, n=8) and ML model (GEO, n=300) use separate datasets not joined due to absent ground-truth labels on SRA samples
-2. **Class imbalance** — 84.7% cancer in GEO dataset; accuracy alone is misleading (dummy achieves 84.7%)
+2. **Class imbalance** — 84.7% cancer in the supplied matrix (254/300, matching GEO labels); accuracy alone is misleading (dummy achieves 84.7%)
 3. **External validation inconclusive** — feature resolution mismatch between GEO and BAM-pipeline histograms prevents zero-shot transfer
 4. **Small test set** — only 7 healthy samples in held-out set; specificity/NPV carry wide uncertainty
 5. **Random Forest outperforms CNN+LSTM** — expected on tabular histogram features; CNN+LSTM advantage expected on raw sequence or multi-modal inputs

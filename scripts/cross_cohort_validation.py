@@ -17,8 +17,8 @@ for side-by-side comparison.
 Requires:
   - results/validation/jiang_hcc_features.csv  (from process_validation_cohorts.py)
   - model/best_model.pt
-  - results/X_train.npy  (for scaler fitting)
-  - results/y_train.npy
+  - data/feature_matrix.csv  (raw GEO train split, to fit the scaler)
+  - results/X_test.npy, results/y_test.npy  (from 01_preprocess.py)
 """
 
 import os, sys, json
@@ -27,78 +27,54 @@ import pandas as pd
 
 BASE = os.path.join(os.path.dirname(__file__), '..')
 
-# ── Model architecture (must match train_model.py) ───────────────────────────
+# ── Model architecture: same class used by 03_train_model.py ─────────────────
 import torch
-import torch.nn as nn
+sys.path.insert(0, os.path.join(BASE, 'model'))
+from model_architecture import LiquidBiopsyNet
 
-class CNNLSTM(nn.Module):
-    def __init__(self, input_size=150, num_classes=2):
-        super().__init__()
-        self.conv1 = nn.Conv1d(1, 32, kernel_size=7, padding=3)
-        self.bn1   = nn.BatchNorm1d(32)
-        self.conv2 = nn.Conv1d(32, 64, kernel_size=5, padding=2)
-        self.bn2   = nn.BatchNorm1d(64)
-        self.pool  = nn.MaxPool1d(2)
-        self.dropout_cnn = nn.Dropout(0.3)
-        # After 2x pool: input_size//4 timesteps, but use global avg pool instead
-        self.global_avg_pool = nn.AdaptiveAvgPool1d(1)
-        self.lstm  = nn.LSTM(input_size=1, hidden_size=64, num_layers=2,
-                             batch_first=True, dropout=0.3)
-        self.dropout_lstm = nn.Dropout(0.3)
-        # CNN branch: 64 features, LSTM branch: 64 features
-        self.fc1 = nn.Linear(64 + 64, 64)
-        self.fc2 = nn.Linear(64, num_classes)
+META_COLS = ('gsm_id', 'tissue_type', 'cancer_label', 'sample_type')
 
-    def forward(self, x):
-        # x: (batch, 150)
-        # CNN branch
-        c = x.unsqueeze(1)                         # (batch, 1, 150)
-        c = torch.relu(self.bn1(self.conv1(c)))
-        c = torch.relu(self.bn2(self.conv2(c)))
-        c = self.dropout_cnn(c)
-        c = self.global_avg_pool(c).squeeze(-1)    # (batch, 64)
-        # LSTM branch
-        l = x.unsqueeze(-1)                        # (batch, 150, 1)
-        l, _ = self.lstm(l)
-        l = self.dropout_lstm(l[:, -1, :])         # last hidden (batch, 64)
-        # Combine
-        out = torch.cat([c, l], dim=1)             # (batch, 128)
-        out = torch.relu(self.fc1(out))
-        return self.fc2(out)
+
+def fit_internal_scaler(seed=42):
+    """Rebuild the raw GEO train split exactly as 01_preprocess.py does
+    (70/15/15, stratified, seed 42) and fit the scaler on raw TRAIN rows only.
+    results/X_train.npy is already standardised, so re-fitting a scaler on it
+    would be an identity transform and external features would stay unscaled."""
+    from sklearn.model_selection import train_test_split
+    from sklearn.preprocessing import StandardScaler
+    df = pd.read_csv(os.path.join(BASE, 'data', 'feature_matrix.csv'))
+    feature_cols = [c for c in df.columns if c not in META_COLS]
+    # label semantics: cancer_label 1 == sample_type 'cancer' (verified in data)
+    y = df['cancer_label'].values.astype(np.int64)
+    assert ((df['sample_type'] == 'cancer').astype(int).values == y).all(), \
+        'cancer_label and sample_type disagree'
+    X = df[feature_cols].values.astype(np.float32)
+    X_tr, _, y_tr, _ = train_test_split(X, y, test_size=0.30,
+                                        random_state=seed, stratify=y)
+    scaler = StandardScaler().fit(X_tr)
+    return scaler, feature_cols
 
 
 def load_and_align_features(ext_df, internal_feature_cols):
     """
-    Align external cohort feature columns to match training feature columns.
-    Fills missing columns with 0, drops extra columns.
+    Strict alignment: every internal feature column must be present, by exact
+    name, with no missing values in the external cohort. Returns None otherwise.
+    (The earlier version zero-filled absent columns and only warned below 50%
+    overlap, which can produce an apparently valid but meaningless evaluation.
+    Matching names also does not prove the features are defined the same way.
+    Check feature definitions by hand, e.g. bin edges and methylation_density.)
     """
-    # Find numeric columns that look like fragment bin features
-    frag_cols = [c for c in ext_df.columns if c.startswith('bin_') or
-                 c.startswith('frag_') or c.startswith('f_') or
-                 any(c == f'bin_{i}' for i in range(200))]
-
-    if not frag_cols:
-        # Try to use all numeric columns except metadata
-        meta_cols = {'sample_id', 'label', 'cancer_type', 'cohort', 'study',
-                     'data_type', 'NOTE'}
-        frag_cols = [c for c in ext_df.columns
-                     if c not in meta_cols and pd.api.types.is_numeric_dtype(ext_df[c])]
-
-    print(f"  External cohort feature columns found: {len(frag_cols)}")
-
-    # Build aligned matrix
-    X_ext = np.zeros((len(ext_df), len(internal_feature_cols)))
-    matched = 0
-    for i, col in enumerate(internal_feature_cols):
-        if col in frag_cols:
-            X_ext[:, i] = ext_df[col].fillna(0).values
-            matched += 1
-
-    print(f"  Matched {matched}/{len(internal_feature_cols)} internal feature columns")
-    if matched < len(internal_feature_cols) * 0.5:
-        print("  WARNING: <50% feature overlap — results may not be meaningful")
-
-    return X_ext
+    missing = [c for c in internal_feature_cols if c not in ext_df.columns]
+    if missing:
+        print(f"  ERROR: external cohort lacks {len(missing)}/{len(internal_feature_cols)} "
+              f"internal feature columns (first: {missing[:5]}). Not evaluating.")
+        return None
+    X_ext = ext_df[internal_feature_cols]
+    n_nan = int(X_ext.isna().sum().sum())
+    if n_nan:
+        print(f"  ERROR: {n_nan} missing values in external features. Not evaluating.")
+        return None
+    return X_ext.values.astype(np.float32)
 
 
 def run_validation():
@@ -114,43 +90,22 @@ def run_validation():
     print("CROSS-COHORT VALIDATION")
     print("=" * 60)
 
-    # ── Load internal training data (for scaler) ──────────────────────────
-    X_train_path = os.path.join(BASE, 'results', 'X_train.npy')
-    y_train_path = os.path.join(BASE, 'results', 'y_train.npy')
-    X_test_path  = os.path.join(BASE, 'results', 'X_test.npy')
-    y_test_path  = os.path.join(BASE, 'results', 'y_test.npy')
-
-    if not all(os.path.exists(p) for p in [X_train_path, y_train_path]):
-        print("ERROR: results/X_train.npy not found — run 01_preprocess.py first")
-        sys.exit(1)
-
-    X_train = np.load(X_train_path)
-    y_train = np.load(y_train_path)
-    X_test  = np.load(X_test_path)
-    y_test  = np.load(y_test_path)
-
-    # Load feature matrix to get column names
-    feat_matrix_path = os.path.join(BASE, 'data', 'feature_matrix.csv')
-    feat_df = pd.read_csv(feat_matrix_path)
-    label_col = [c for c in feat_df.columns if c in ('label', 'Label', 'target')][0]
-    feature_cols = [c for c in feat_df.columns if c != label_col]
+    # ── Internal scaler (raw GEO train rows only) and held-out test split ──
+    scaler, feature_cols = fit_internal_scaler()
     print(f"Internal feature columns: {len(feature_cols)}")
-
-    # Fit scaler on train set only
-    scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
-    X_test_scaled  = scaler.transform(X_test)
+    # Pre-standardised hold-out arrays written by 01_preprocess.py
+    X_test_scaled = np.load(os.path.join(BASE, 'results', 'X_test.npy'))
+    y_test        = np.load(os.path.join(BASE, 'results', 'y_test.npy'))
 
     # ── Load trained model ────────────────────────────────────────────────
     model_path = os.path.join(BASE, 'model', 'best_model.pt')
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-    model = CNNLSTM(input_size=X_train.shape[1])
+    device = torch.device('cpu')
     checkpoint = torch.load(model_path, map_location=device)
-    if isinstance(checkpoint, dict) and 'model_state_dict' in checkpoint:
-        model.load_state_dict(checkpoint['model_state_dict'])
-    else:
-        model.load_state_dict(checkpoint)
+    cfg = checkpoint.get('config', {})
+    model = LiquidBiopsyNet(input_len=cfg.get('input_len', 150),
+                            num_classes=cfg.get('num_classes', 2),
+                            dropout=cfg.get('dropout', 0.5))
+    model.load_state_dict(checkpoint['model_state'])
     model.eval()
     print(f"Loaded model from {model_path}")
 
@@ -182,6 +137,10 @@ def run_validation():
     print(f"  Labels: {dict(ext_df['label'].value_counts())}")
 
     y_ext = ext_df['label'].values
+    # Must be 1 = cancer, 0 = healthy to match the GEO labels; refuse anything else.
+    if not set(np.unique(y_ext)) <= {0, 1}:
+        print(f"  ERROR: external 'label' values {np.unique(y_ext)} are not 0/1 (0=healthy, 1=cancer)")
+        return None
 
     if len(np.unique(y_ext)) < 2:
         print("  ERROR: Only one class present in external cohort — AUC undefined")
@@ -189,6 +148,8 @@ def run_validation():
 
     # ── Align and scale external features ────────────────────────────────
     X_ext = load_and_align_features(ext_df, feature_cols)
+    if X_ext is None:
+        return None
     X_ext_scaled = scaler.transform(X_ext)
 
     # ── Predict on external cohort ────────────────────────────────────────
